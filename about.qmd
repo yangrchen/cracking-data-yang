@@ -1,0 +1,19 @@
+---
+title: "About"
+image: profile.png
+about:
+  template: solana
+  image-width: 23em
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://linkedin.com/yangrchen
+    - icon: github
+      text: Github
+      href: https://github.com/yangrchen
+
+---
+
+**Cracking Data** is all about my love for experimenting with data. It's a collection of articles which help explain awesome tools, concepts, and projects through the context of disciplines that I am passionate about like art and martial arts!
+
+Who am I? I’m a data science Master’s student who's interested in AI, deep learning, and explainable data science. I aim to keep my work fun and informative so others might be inspired to share their own experiments. 
