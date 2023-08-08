@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Yang Chen">
+<meta name="dcterms.date" content="2023-08-07">
+
+<title>Cracking Data with Yang - Artwork Single-Label Classifier Using Fastai</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Cracking Data with Yang</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/yangrchen" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Artwork Single-Label Classifier Using Fastai</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">machine learning</div>
+                <div class="quarto-category">computer vision</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Yang Chen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 7, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#inspiration-toolkit-data" id="toc-inspiration-toolkit-data" class="nav-link active" data-scroll-target="#inspiration-toolkit-data"><span class="header-section-number">1</span> Inspiration, Toolkit, Data</a></li>
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports"><span class="header-section-number">2</span> Imports</a></li>
+  <li><a href="#loading-the-data" id="toc-loading-the-data" class="nav-link" data-scroll-target="#loading-the-data"><span class="header-section-number">3</span> Loading the Data</a></li>
+  <li><a href="#data-loading" id="toc-data-loading" class="nav-link" data-scroll-target="#data-loading"><span class="header-section-number">4</span> Data Loading</a>
+  <ul class="collapse">
+  <li><a href="#dataloader-function" id="toc-dataloader-function" class="nav-link" data-scroll-target="#dataloader-function"><span class="header-section-number">4.1</span> Dataloader Function</a></li>
+  </ul></li>
+  <li><a href="#model-specification-training-results-validation" id="toc-model-specification-training-results-validation" class="nav-link" data-scroll-target="#model-specification-training-results-validation"><span class="header-section-number">5</span> Model Specification, Training, Results Validation</a>
+  <ul class="collapse">
+  <li><a href="#learning-rate-finder" id="toc-learning-rate-finder" class="nav-link" data-scroll-target="#learning-rate-finder"><span class="header-section-number">5.1</span> Learning Rate Finder</a></li>
+  <li><a href="#cycle-idea" id="toc-cycle-idea" class="nav-link" data-scroll-target="#cycle-idea"><span class="header-section-number">5.2</span> 1cycle Idea</a></li>
+  <li><a href="#interpreting-the-loss-curves-further-training" id="toc-interpreting-the-loss-curves-further-training" class="nav-link" data-scroll-target="#interpreting-the-loss-curves-further-training"><span class="header-section-number">5.3</span> Interpreting the Loss Curves, Further Training?</a></li>
+  <li><a href="#overfitting" id="toc-overfitting" class="nav-link" data-scroll-target="#overfitting"><span class="header-section-number">5.4</span> Overfitting</a></li>
+  </ul></li>
+  <li><a href="#prediction-inference" id="toc-prediction-inference" class="nav-link" data-scroll-target="#prediction-inference"><span class="header-section-number">6</span> Prediction / Inference</a></li>
+  <li><a href="#further-steps-moving-forward" id="toc-further-steps-moving-forward" class="nav-link" data-scroll-target="#further-steps-moving-forward"><span class="header-section-number">7</span> Further Steps / Moving Forward</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>I’ve always been interested in how machine learning can apply to visual arts. In particular, computer vision feels like the most direct application to art since we can build programs to classify, modify, and even generate visuals in an artistic fashion!</p>
+<p>I’m by no means a deep learning aficionado but it’s exciting to tinker around with the different tools and concepts I have at my disposal. In this notebook, we will be exploring how to build out an image classification model which classifies artwork based on their different types.</p>
+<p>We’ll be using the fastai framework to speed up the development process and utilize modern deep learning techniques. Along the way, I will also be covering several different concepts that I have found useful in implementing vision models. I assume some level of familiarity with machine learning concepts such as epochs and mini-batch gradient descent. And ultimately, my hope is for this notebook to become the start of projects that inspire and help other deep learning practitioners along their own journeys!</p>
+<section id="inspiration-toolkit-data" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Inspiration, Toolkit, Data</h1>
+<p>The inspiration for this notebook comes from the computer vision lessons from <a href="https://www.fast.ai/">fastai</a>, a deep learning framework built mainly over <a href="https://pytorch.org/">PyTorch</a>. I’m continuing to use fastai for a few reasons:</p>
+<ul>
+<li>The capability to train modern, well-tuned models right out of the box</li>
+<li>High-level abstractions that can cooperate with low-level capabilities</li>
+<li>The focus on architecture and prototyping rather than granular details</li>
+</ul>
+<p>For the image data, we will be using a Kaggle dataset called <a href="https://www.kaggle.com/datasets/thedownhill/art-images-drawings-painting-sculpture-engraving">Art Images: Drawing / Painting / Sculptures / Engravings</a> which contains around 9000 images of 5 different types of art.</p>
+<p>With a bit of that context out of the way, let’s get started!</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix for the progress bar not displaying correctly during training</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> clear_output, DisplayHandle</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_patch(<span class="va">self</span>, obj):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    clear_output(wait<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.display(obj)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>DisplayHandle.update <span class="op">=</span> update_patch</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="imports" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Imports</h1>
+<div class="cell" data-execution_count="2">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>load_dotenv(override<span class="op">=</span><span class="va">True</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="loading-the-data" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Loading the Data</h1>
+<p>The dataset provided to us has already separated the data into training and validation sets in the directories <code>dataset/dataset_updated/training_set</code> and <code>dataset/dataset_updated/validation_set</code>, respectively.</p>
+<p>To make the path structure a little simpler, we can move these directories to a directory called <code>data/</code>.</p>
+<div class="cell" data-execution_count="3">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Change the original directory path to data/</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>orig_data_path <span class="op">=</span> Path(<span class="st">'dataset/dataset_updated/'</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> Path(<span class="st">'data'</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> path.exists():</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    orig_data_path.rename(path)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">'dataset'</span>).rmdir()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Just to make sure all of our data is valid, let’s check for any images we cannot open using the fastai <code>verify_images</code> function. If there are any failed images, we can remove them using <code>Path.unlink</code>.</p>
+<div class="cell" data-execution_count="4">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieve image files on data path</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>im <span class="op">=</span> get_image_files(path)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check to see which images we cannot open</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>failed <span class="op">=</span> verify_images(im)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Number of images: </span><span class="sc">{</span><span class="bu">len</span>(im)<span class="sc">}</span><span class="ss"> | Number of failed: </span><span class="sc">{</span><span class="bu">len</span>(failed)<span class="sc">}</span><span class="ss"> | Remaining: </span><span class="sc">{</span><span class="bu">len</span>(im) <span class="op">-</span> <span class="bu">len</span>(failed)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>failed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Number of images: 8577 | Number of failed: 0 | Remaining: 8577</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>(#0) []</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="5">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>failed.<span class="bu">map</span>(Path.unlink)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>(#0) []</code></pre>
+</div>
+</div>
+</section>
+<section id="data-loading" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Data Loading</h1>
+<p>At the core of fastai’s data abstractions is their DataBlock API which is a high-level data loading API. We design our <code>DataBlock</code> with a few key questions in mind to make sure our data is loaded properly for training:</p>
+<ol type="1">
+<li><code>blocks</code>: What are the types of my inputs and targets?</li>
+<li><code>get_items</code>: Where are we getting our data?</li>
+<li><code>splitter</code>: How does our data need to be separated for cross-validation?</li>
+<li><code>get_y</code>: What is our predicted target?</li>
+<li><code>item_tfms</code>: How do we want to transform individual items?</li>
+<li><code>batch_tfms</code>: How do we want to transform groups of items?</li>
+</ol>
+<p>We then create a <code>DataLoaders</code> object from our <code>DataBlock</code> which will allow us to iterate over our dataset as a series of batches.</p>
+<p>For our task of classifying different types of artwork, we will answer the previous questions with the following to help create the <code>DataBlock</code> we want:</p>
+<ol type="1">
+<li>With images, we process our data with <code>ImageBlock</code> and set our target to single categories using <code>CategoryBlock</code></li>
+<li><code>get_image_files</code> can be used to get all our image data from a specified path</li>
+<li>We split our data into a training and valid dataset based on the grandparent directory each image is in using <code>GrandparentSplitter</code></li>
+<li>The labels for our image targets will use the name of the directory they are located in using <code>parent_label</code></li>
+<li>Every item will be resized to 460 pixel dimensions on the CPU</li>
+<li>We will apply a series of flip, rotate, zoom, warp, lighting transforms on whole batches of images using the GPU</li>
+</ol>
+<p>For our task, we’ll spin up a function <code>get_dls</code> to quickly spin up dataloaders with different batch and image sizes.</p>
+<section id="dataloader-function" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="dataloader-function"><span class="header-section-number">4.1</span> Dataloader Function</h2>
+<div class="cell" data-execution_count="6">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_dls(bs: <span class="bu">int</span>, size: <span class="bu">int</span>) <span class="op">-&gt;</span> DataLoaders:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a dataloader for an image recognition task with specified batch size and image size.</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">    # Parameters:</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">    -   bs (int): Batch size.</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">    -   size (int): Final size of individual images.</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">    # Returns:</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">    -   DataLoaders: A dataloader that batches our image data with specific image and batch size.</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    db <span class="op">=</span> DataBlock(</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        blocks<span class="op">=</span>(ImageBlock(), CategoryBlock()),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        get_items<span class="op">=</span>get_image_files,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        splitter<span class="op">=</span>GrandparentSplitter(train_name<span class="op">=</span><span class="st">'training_set'</span>, valid_name<span class="op">=</span><span class="st">'validation_set'</span>),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        get_y<span class="op">=</span>parent_label,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        item_tfms<span class="op">=</span>Resize(<span class="dv">460</span>),</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        batch_tfms<span class="op">=</span>aug_transforms(size<span class="op">=</span>size, min_scale<span class="op">=</span><span class="fl">0.75</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> db.dataloaders(path, bs<span class="op">=</span>bs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>When we create our dataloader, we can verify that our splitter is working as we expect it to.</p>
+<div class="cell" data-execution_count="7">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_dls(<span class="dv">64</span>, <span class="dv">128</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(dls.train_ds), <span class="bu">len</span>(dls.valid_ds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>(7721, 856)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="8">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verifying that the number of images in each directory is the same</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>exts <span class="op">=</span> [<span class="st">'.jpg'</span>, <span class="st">'.jpeg'</span>, <span class="st">'.png'</span>]</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>([p <span class="cf">for</span> p <span class="kw">in</span> (path <span class="op">/</span> <span class="st">'training_set'</span>).rglob(<span class="st">'*'</span>) <span class="cf">if</span> p.suffix <span class="kw">in</span> exts]), <span class="bu">len</span>([p <span class="cf">for</span> p <span class="kw">in</span> (path <span class="op">/</span> <span class="st">'validation_set'</span>).rglob(<span class="st">'*'</span>) <span class="cf">if</span> p.suffix <span class="kw">in</span> exts])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>(7721, 856)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="9">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show an example batch of images</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>dls.show_batch()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-10-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="model-specification-training-results-validation" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Model Specification, Training, Results Validation</h1>
+<p>Once our data is loaded in, our next step is to specify our model.</p>
+<p>One key idea that I have taken away from fastai is the high effectiveness of using <strong>transfer learning</strong> for new machine learning tasks.</p>
+<p>Transfer learning is a method of using pretrained models that were trained on one task as a starting point for training models on a new task.</p>
+<p>For computer vision tasks, fastai makes initializing a pretrained model simple through <code>vision_learner</code>–by default, the <code>pretrained</code> parameter is <code>True</code>. When we use a pretrained model, the last layer is replaced with a new linear layer with the same number of outputs as our new transfer learning problem (in this case 5 classes). However, this new layer is randomly initialized so we will need to make sure to tune our model to correctly predict the different artwork types.</p>
+<p>To start, we will use the <strong>resnet50</strong> architecture and track the <code>accuracy</code> metric (percent of images predicted correctly).</p>
+<div class="cell" data-execution_count="33">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet50, metrics<span class="op">=</span>accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="learning-rate-finder" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="learning-rate-finder"><span class="header-section-number">5.1</span> Learning Rate Finder</h2>
+<p>For our model, we first need to select a good learning rate (LR) to start our training. Fastai implements an LR finder method <code>Learner.lr_find</code> based on Leslie Smith’s paper called <a href="https://arxiv.org/pdf/1506.01186.pdf">Cyclical Learning Rates for Training Neural Networks</a>.</p>
+<p>Smith describes his approach as the following:</p>
+<blockquote class="blockquote">
+<p>There is a simple way to estimate reasonable minimum and maximum boundary values with one training run of the network for a few epochs. It is a “LR range test”; run your model for several epochs while letting the learning rate increase linearly between low and high LR values.</p>
+</blockquote>
+<p>Essentially, we check our training losses as we grow our learning rate to get an idea of what learning rate performs well.</p>
+<p>Fastai takes a slightly different approach: The model is test-trained with learning rates that grow exponentially from a low LR to a higher LR across a number of mini-batches. The process continues until we find a learning rate where the loss begins to diverge and increases significantly.</p>
+<p>What this boils down to is that in the fastai version we don’t necessarily need to run for multiple epochs to get an optimal LR as we are training for a set number of mini-batches.</p>
+<!-- Do I need this part? Maybe not. Seems wordy -->
+<p>Conveniently, <code>lr_find</code> gives us the loss vs.&nbsp;LR plot and also enables us to directly extract LRs that could be optimal based off different <em>suggestion</em> functions. For example, I will use <code>steep</code> which gets the LR with the steepest slope.</p>
+<div class="cell" data-execution_count="34">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn.lr_find(suggest_funcs<span class="op">=</span>steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+<p>Log plot of loss vs.&nbsp;learning rate</p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-12-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="cycle-idea" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="cycle-idea"><span class="header-section-number">5.2</span> 1cycle Idea</h2>
+<p>We can now start training our model! Using the <code>fit_one_cycle</code> method we are actually training our model with what is called the <strong>1cycle policy</strong>, an idea that again comes from Leslie Smith and changes our learning rate over the course of training. I won’t be going into close detail on how the 1cycle policy is implemented in the scope of this article. At a high level, we are starting at some initial LR, linearly increasing our LR after every batch up to a maximum LR, and from the maximum LR down to some minimum LR several magnitudes lower than our initial LR.</p>
+<p>The idea behind this all is to warm up our training with a low learning rate and use the high learning rate to help find minimums in our loss function that are flatter, allowing the model to generalize better. During the last segment of training, the descending learning rates help the optimizer avoid skipping over a steeper loss within the flatter areas. This process allows our model to converge faster and consequently achieve better results with lower iterations than traditional training methods. Smith calls this occurrence <strong>super-convergence.</strong></p>
+<div class="cell" data-execution_count="12">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_example_cycle(x_min, x_max, y_min, y_max, padding):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.linspace(x_min, x_max, values <span class="op">+</span> padding)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    y1 <span class="op">=</span> np.linspace(y_min, y_max, values <span class="op">//</span> <span class="dv">2</span>, endpoint<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    y2 <span class="op">=</span> np.linspace(y_max, y_min, values <span class="op">//</span> <span class="dv">2</span>, endpoint<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    padded_values <span class="op">=</span> np.linspace(y_min, y_min <span class="op">*</span> <span class="fl">1e-2</span>, padding)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.concatenate((y1, y2, padded_values))</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    plt.plot(x, y)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Epochs'</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Learning rate'</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="13">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>plot_example_cycle(<span class="dv">0</span>, <span class="dv">40</span>, <span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-1cycle-example" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-1cycle-example-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Example representation of a linear 1cycle learning rate schedule.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<!-- Now that I'm using fine_tune method this section needs a bit of revision -->
+<p>With transfer learning, our model has additional new layers that we can train for the problem we are trying to solve. At the start of training, we may not want to completely readjust the weights in the model’s previously learned layers because they account for high-level details of the image like line and shape.</p>
+<p>In a pretrained model, the previous trained layers start out <strong>frozen</strong>, meaning their weights aren’t updated during training unless we unfreeze them. Later, we will unfreeze all the layers and use a range of learning rates to help adjust them slightly for our artwork classification.</p>
+<p>Fastai recommends training the frozen pretrained model for a few epochs before training the full pretrained model. We’ll start with 3 epochs frozen using the learning rate we found before and then train the full model for 25 epochs. We can get an idea of how our error rates changes across training from here. Our losses along with our metrics will be useful in determining if we’ve fitted a decent model or whether we are underfitting or overfitting.</p>
+<div class="cell" data-execution_count="35">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.632305</td>
+<td>0.351879</td>
+<td>0.885514</td>
+<td>00:11</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.367901</td>
+<td>0.266535</td>
+<td>0.911215</td>
+<td>00:11</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.290731</td>
+<td>0.255560</td>
+<td>0.912383</td>
+<td>00:11</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell" data-execution_count="36">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>learn.unfreeze()</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>learn.lr_find()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-display" data-execution_count="36">
+<pre><code>SuggestedLRs(valley=3.0199516913853586e-05)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-16-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="37">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">30</span>, <span class="fl">1e-5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.278328</td>
+<td>0.252081</td>
+<td>0.913551</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.270599</td>
+<td>0.246448</td>
+<td>0.917056</td>
+<td>00:12</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.257108</td>
+<td>0.233751</td>
+<td>0.920561</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.248420</td>
+<td>0.236578</td>
+<td>0.913551</td>
+<td>00:12</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0.225075</td>
+<td>0.217247</td>
+<td>0.922897</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0.219640</td>
+<td>0.218755</td>
+<td>0.921729</td>
+<td>00:12</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>0.193035</td>
+<td>0.220623</td>
+<td>0.927570</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>0.181702</td>
+<td>0.207903</td>
+<td>0.929907</td>
+<td>00:12</td>
+</tr>
+<tr class="odd">
+<td>8</td>
+<td>0.153848</td>
+<td>0.203974</td>
+<td>0.931075</td>
+<td>00:13</td>
+</tr>
+<tr class="even">
+<td>9</td>
+<td>0.140883</td>
+<td>0.205168</td>
+<td>0.928738</td>
+<td>00:12</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>0.122441</td>
+<td>0.198469</td>
+<td>0.932243</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>11</td>
+<td>0.122553</td>
+<td>0.203679</td>
+<td>0.927570</td>
+<td>00:12</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>0.105032</td>
+<td>0.212182</td>
+<td>0.929907</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>13</td>
+<td>0.107883</td>
+<td>0.198044</td>
+<td>0.936916</td>
+<td>00:13</td>
+</tr>
+<tr class="odd">
+<td>14</td>
+<td>0.100362</td>
+<td>0.198456</td>
+<td>0.939252</td>
+<td>00:13</td>
+</tr>
+<tr class="even">
+<td>15</td>
+<td>0.093048</td>
+<td>0.206936</td>
+<td>0.932243</td>
+<td>00:13</td>
+</tr>
+<tr class="odd">
+<td>16</td>
+<td>0.077934</td>
+<td>0.204801</td>
+<td>0.938084</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>17</td>
+<td>0.081075</td>
+<td>0.208896</td>
+<td>0.933411</td>
+<td>00:13</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td>0.076961</td>
+<td>0.210113</td>
+<td>0.934579</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>19</td>
+<td>0.065377</td>
+<td>0.203140</td>
+<td>0.932243</td>
+<td>00:13</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td>0.063294</td>
+<td>0.201389</td>
+<td>0.939252</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>21</td>
+<td>0.063553</td>
+<td>0.204729</td>
+<td>0.935748</td>
+<td>00:13</td>
+</tr>
+<tr class="odd">
+<td>22</td>
+<td>0.059901</td>
+<td>0.220824</td>
+<td>0.934579</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>23</td>
+<td>0.053123</td>
+<td>0.210733</td>
+<td>0.933411</td>
+<td>00:13</td>
+</tr>
+<tr class="odd">
+<td>24</td>
+<td>0.054386</td>
+<td>0.207903</td>
+<td>0.939252</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>25</td>
+<td>0.057231</td>
+<td>0.219750</td>
+<td>0.935748</td>
+<td>00:12</td>
+</tr>
+<tr class="odd">
+<td>26</td>
+<td>0.056672</td>
+<td>0.218769</td>
+<td>0.935748</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td>0.047327</td>
+<td>0.207138</td>
+<td>0.935748</td>
+<td>00:13</td>
+</tr>
+<tr class="odd">
+<td>28</td>
+<td>0.060546</td>
+<td>0.209229</td>
+<td>0.938084</td>
+<td>00:12</td>
+</tr>
+<tr class="even">
+<td>29</td>
+<td>0.053616</td>
+<td>0.211565</td>
+<td>0.936916</td>
+<td>00:12</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="interpreting-the-loss-curves-further-training" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="interpreting-the-loss-curves-further-training"><span class="header-section-number">5.3</span> Interpreting the Loss Curves, Further Training?</h2>
+<p>After training our model, we will see how our training and validation losses have changed over the course of our iteration / epochs using <strong>loss curves</strong>. Loss curves won’t provide the entire story of our model but we’ll have a broad picture of how our model performs over the selected dataset and batch size.</p>
+<div class="cell" data-execution_count="39">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>learn.recorder.plot_loss()</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Iterations"</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Loss"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="39">
+<pre><code>Text(0, 0.5, 'Loss')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-18-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Initially, our validation loss starts out lower than our training loss but our training loss quickly converges as our training progresses.</p>
+<p>We should note that we reach a point where our validation loss is higher than our training loss. The former also does not seem to converge any more which leads us to an important question: are we <strong>overfitting</strong>?</p>
+</section>
+<section id="overfitting" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="overfitting"><span class="header-section-number">5.4</span> Overfitting</h2>
+<p>Overfitting occurs when we have trained for too long and the model begins to “memorize” the training data while failing to generalize well to new data.</p>
+<p>When we look at our losses, we might decide an increasing validation loss with a continually decreasing training loss means we are overfitting. However, this is not necessarily the case–one key takeaway from fastai is that we should be checking if our performance metric is getting worse to decide if the model is overfitting.</p>
+<div class="cell" data-execution_count="41">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>accuracy_metric <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">2</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Highest accuracy during last run: </span><span class="sc">{</span>np<span class="sc">.</span>argmax(accuracy_metric)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Accuracy'</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Epoch'</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>plt.xticks(np.arange(<span class="dv">0</span>, <span class="bu">len</span>(accuracy_metric) <span class="op">+</span> <span class="dv">1</span>, <span class="dv">5</span>))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>plt.plot(accuracy_metric)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Highest accuracy during last run: 14</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-19-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Our highest accuracy is at epoch 14 and it doesn’t show clear signs of improvement with additional training. If we take into account both our validation loss and metric, then our model <em>might</em> be overfitting but it’s not clear. However, we have a few options here! We could introduce regularization, choose a deeper architecture or even rerun our model with a lower number of epochs and adjust from there. In this case, we will select a deeper architecture using discriminative learning rates. Using a deeper model, we might be able to learn the patterns of our data better.</p>
+<p>We should keep in mind that our performance metric is what ultimately matters in practice.</p>
+<p>As Jeremy Howard states:</p>
+<blockquote class="blockquote">
+<p>“In the end what matters is your accuracy, or more generally your chosen metrics, not the loss. The loss is just the function we’ve given the computer to help us to optimize.”</p>
+<p>“Remember, it’s not just that we’re looking for the validation loss to get worse, but the actual metrics. Your validation loss will first get worse during training because the model gets overconfident, and only later will get worse because it is incorrectly memorizing the data. We only care in practice about the latter issue. Remember, our loss function is just something that we use to allow our optimizer to have something it can differentiate and optimize; it’s not actually the thing we care about in practice.”</p>
+</blockquote>
+<p>To really evaluate our model’s performance, we would run our model on a representative test data set that it has never seen before. This would help us get a good idea of our model’s practical performance.</p>
+<div class="cell" data-execution_count="44">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reinitialize our model to restart training</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet101, metrics<span class="op">=</span>accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="45">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn.lr_find(suggest_funcs<span class="op">=</span>steep, show_plot<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.630548</td>
+<td>0.262199</td>
+<td>0.907710</td>
+<td>00:14</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.352523</td>
+<td>0.220467</td>
+<td>0.919393</td>
+<td>00:14</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.275075</td>
+<td>0.213857</td>
+<td>0.920561</td>
+<td>00:14</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell" data-execution_count="46">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>learn.unfreeze()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>learn.lr_find()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-display" data-execution_count="46">
+<pre><code>SuggestedLRs(valley=1.737800812406931e-05)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-22-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="47">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">10</span>, lr_max<span class="op">=</span><span class="bu">slice</span>(<span class="fl">1e-6</span>, <span class="fl">1e-4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">epoch</th>
+<th data-quarto-table-cell-role="th">train_loss</th>
+<th data-quarto-table-cell-role="th">valid_loss</th>
+<th data-quarto-table-cell-role="th">accuracy</th>
+<th data-quarto-table-cell-role="th">time</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.271231</td>
+<td>0.216878</td>
+<td>0.915888</td>
+<td>00:17</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.233810</td>
+<td>0.186462</td>
+<td>0.928738</td>
+<td>00:17</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.212894</td>
+<td>0.168020</td>
+<td>0.928738</td>
+<td>00:17</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.175912</td>
+<td>0.168379</td>
+<td>0.927570</td>
+<td>00:17</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>0.156709</td>
+<td>0.168505</td>
+<td>0.933411</td>
+<td>00:17</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0.136558</td>
+<td>0.161048</td>
+<td>0.948598</td>
+<td>00:17</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>0.124741</td>
+<td>0.157284</td>
+<td>0.936916</td>
+<td>00:17</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>0.105511</td>
+<td>0.157003</td>
+<td>0.943925</td>
+<td>00:18</td>
+</tr>
+<tr class="odd">
+<td>8</td>
+<td>0.105623</td>
+<td>0.155143</td>
+<td>0.947430</td>
+<td>00:17</td>
+</tr>
+<tr class="even">
+<td>9</td>
+<td>0.108300</td>
+<td>0.154238</td>
+<td>0.945093</td>
+<td>00:18</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>We improved our accuracy up to around 94% by using a deeper model with discriminative learning rates. However, every choice has tradeoffs. Training a deeper model takes more time in general and in our low-risk context the increase in accuracy could be neglible. Let’s take a closer look at how our fine-tuned model is doing on our image set.</p>
+<div class="cell" data-execution_count="48">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>interp <span class="op">=</span> ClassificationInterpretation.from_learner(learn)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>interp.plot_confusion_matrix()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-24-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="51">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>interp.print_classification_report()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              precision    recall  f1-score   support
+
+    drawings       0.85      0.80      0.83       122
+   engraving       0.79      0.86      0.82        84
+ iconography       0.97      1.00      0.99       231
+    painting       0.98      0.96      0.97       228
+   sculpture       0.99      0.99      0.99       191
+
+    accuracy                           0.95       856
+   macro avg       0.92      0.92      0.92       856
+weighted avg       0.95      0.95      0.95       856
+</code></pre>
+</div>
+</div>
+<p>The weighted F1-score is the the mean of all the class F1 scores while taking into account the number of occurrences in each class. The score has a range from 0 to 1. Our model achieved a weighted F1-score of <strong>0.95</strong>. Not bad!</p>
+<p>In production, we should take these results with a grain of salt since we haven’t done any true performance testing. But it’s fascinating that we can achieve such results with just a bit of conceptual understanding and a few lines of code!</p>
+</section>
+</section>
+<section id="prediction-inference" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Prediction / Inference</h1>
+<p>The last thing I want to cover is how we can use our newly trained model to make predictions on new artwork images. We first export our model:</p>
+<div class="cell" data-execution_count="52">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save model into models/</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> Path(<span class="st">'models'</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>learn.export(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="55">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load model and display the unique classes that can be predicted by the model</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>artwork_model <span class="op">=</span> load_learner(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>artwork_model.dls.vocab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="55">
+<pre><code>['drawings', 'engraving', 'iconography', 'painting', 'sculpture']</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="71">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieve the image for inference</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>inf_path <span class="op">=</span> Path(<span class="st">'inference'</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>img_inf <span class="op">=</span> PILImage.create(inf_path <span class="op">/</span> <span class="st">'drawing_1.jpeg'</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>img_inf.to_thumb(<span class="dv">400</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="71">
+<p><img src="index_files/figure-html/cell-28-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="69">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a list of individual probabilities for each class</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(<span class="bu">zip</span>(artwork_model.dls.vocab, artwork_model.predict(img_inf)[<span class="dv">2</span>] <span class="op">*</span> <span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-display" data-execution_count="69">
+<pre><code>[('drawings', tensor(77.8390)),
+ ('engraving', tensor(22.1252)),
+ ('iconography', tensor(0.0320)),
+ ('painting', tensor(0.0001)),
+ ('sculpture', tensor(0.0037))]</code></pre>
+</div>
+</div>
+<p>Our model correctly predicts that our image is a drawing with a 77.8% probability.</p>
+</section>
+<section id="further-steps-moving-forward" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Further Steps / Moving Forward</h1>
+<p>We covered a lot of concepts! Deep learning and data science as a whole is an art form. For every step in the model development process there are always more design choices and optimizations we could have made. I’m eager to explore every single concept I’ve been learning about, but there is too much to cover in a single article. I chose to focus on the concepts that I think will help readers understand essential elements of fastai and deep learning.</p>
+<p>Here are a few deep learning concepts (computer vision and general topics) that I would love to cover in future posts:</p>
+<ul>
+<li>Multi-label classification</li>
+<li>Data augmentation: Progressive resizing, mixup, cutout</li>
+<li>Convolution neural networks in detail</li>
+</ul>
+<p>Happy learning!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
