@@ -10,6 +10,7 @@ website:
         href: https://github.com/yangrchen
 format:
   html:
+    highlight-style: dracula
     theme:
       light: flatly
       dark: darkly 
