@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Yang Chen">
-<meta name="dcterms.date" content="2023-08-07">
+<meta name="dcterms.date" content="2023-09-27">
 
 <title>Cracking Data with Yang - Classifying Artwork Types With Fastai</title>
 <style>
@@ -164,7 +164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">August 7, 2023</p>
+        <p class="date">September 27, 2023</p>
       </div>
     </div>
     
@@ -190,7 +190,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#model-specification-training-results-validation" id="toc-model-specification-training-results-validation" class="nav-link" data-scroll-target="#model-specification-training-results-validation"><span class="header-section-number">5</span> Model Specification, Training, Results Validation</a>
   <ul class="collapse">
   <li><a href="#learning-rate-finder" id="toc-learning-rate-finder" class="nav-link" data-scroll-target="#learning-rate-finder"><span class="header-section-number">5.1</span> Learning Rate Finder</a></li>
-  <li><a href="#cycle-idea" id="toc-cycle-idea" class="nav-link" data-scroll-target="#cycle-idea"><span class="header-section-number">5.2</span> 1cycle Idea</a></li>
+  <li><a href="#one-cycle-idea" id="toc-one-cycle-idea" class="nav-link" data-scroll-target="#one-cycle-idea"><span class="header-section-number">5.2</span> One-cycle Idea</a></li>
   <li><a href="#interpreting-the-loss-curves-further-training" id="toc-interpreting-the-loss-curves-further-training" class="nav-link" data-scroll-target="#interpreting-the-loss-curves-further-training"><span class="header-section-number">5.3</span> Interpreting the Loss Curves, Further Training?</a></li>
   <li><a href="#overfitting" id="toc-overfitting" class="nav-link" data-scroll-target="#overfitting"><span class="header-section-number">5.4</span> Overfitting</a></li>
   </ul></li>
@@ -218,91 +218,71 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>For the image data, we will be using a Kaggle dataset called <a href="https://www.kaggle.com/datasets/thedownhill/art-images-drawings-painting-sculpture-engraving">Art Images: Drawing / Painting / Sculptures / Engravings</a> which contains around 9000 images of 5 different types of art.</p>
 <p>With a bit of that context out of the way, let’s get started!</p>
-<div class="cell" data-execution_count="1">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix for the progress bar not displaying correctly during training</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> clear_output, DisplayHandle</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_patch(<span class="va">self</span>, obj):</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    clear_output(wait<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.display(obj)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>DisplayHandle.update <span class="op">=</span> update_patch</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 </section>
 <section id="imports" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Imports</h1>
-<div class="cell" data-execution_count="2">
+<div class="cell" data-execution_count="176">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dotenv <span class="im">import</span> load_dotenv</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>load_dotenv(override<span class="op">=</span><span class="va">True</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kaggle <span class="im">import</span> api</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="loading-the-data" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Loading the Data</h1>
+<p>We’ll first use the Kaggle API to download the dataset into our working directory.</p>
 <p>The dataset provided to us has already separated the data into training and validation sets in the directories <code>dataset/dataset_updated/training_set</code> and <code>dataset/dataset_updated/validation_set</code>, respectively.</p>
 <p>To make the path structure a little simpler, we can move these directories to a directory called <code>data/</code>.</p>
-<div class="cell" data-execution_count="2">
+<div class="cell" data-execution_count="12">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>kaggle datasets download <span class="op">-</span>d thedownhill<span class="op">/</span>art<span class="op">-</span>images<span class="op">-</span>drawings<span class="op">-</span>painting<span class="op">-</span>sculpture<span class="op">-</span>engraving</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> Path(<span class="st">'data'</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>download_path <span class="op">=</span> Path(<span class="st">'.'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    cred_path <span class="op">=</span> Path(<span class="st">'~/.kaggle/kaggle.json'</span>).expanduser()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    dataset <span class="op">=</span> <span class="st">'thedownhill/art-images-drawings-painting-sculpture-engraving'</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    api.dataset_download_cli(dataset, path<span class="op">=</span>download_path)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    shutil.unpack_archive(<span class="bu">str</span>(download_path <span class="op">/</span> <span class="st">'art-images-drawings-painting-sculpture-engraving.zip'</span>), download_path)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    (download_path <span class="op">/</span> <span class="st">'art-images-drawings-painting-sculpture-engraving.zip'</span>).unlink()</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    (download_path <span class="op">/</span> <span class="st">'dataset/dataset_updated/'</span>).rename(data_path)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    (download_path <span class="op">/</span> <span class="st">'dataset'</span>).rmdir()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Downloading art-images-drawings-painting-sculpture-engraving.zip to /home/yang/projects/data_science_blog/posts/projects/artwork_classifier
-100%|███████████████████████████████████████▉| 582M/583M [00:24&lt;00:00, 25.9MB/s]
-100%|████████████████████████████████████████| 583M/583M [00:24&lt;00:00, 24.8MB/s]</code></pre>
+<pre><code>Downloading art-images-drawings-painting-sculpture-engraving.zip to .
+</code></pre>
 </div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 583M/583M [00:22&lt;00:00, 27.2MB/s] </code></pre>
 </div>
-<div class="cell" data-execution_count="4">
-<details open="">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>unzip art<span class="op">-</span>images<span class="op">-</span>drawings<span class="op">-</span>painting<span class="op">-</span>sculpture<span class="op">-</span>engraving.<span class="bu">zip</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell" data-execution_count="3">
-<details open="">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Change the original directory path to data/</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>orig_data_path <span class="op">=</span> Path(<span class="st">'dataset/dataset_updated/'</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> Path(<span class="st">'data'</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> path.exists():</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    orig_data_path.rename(path)</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    Path(<span class="st">'dataset'</span>).rmdir()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <p>Just to make sure all of our data is valid, let’s check for any images we cannot open using the fastai <code>verify_images</code> function. If there are any failed images, we can remove them using <code>Path.unlink</code>.</p>
-<div class="cell" data-execution_count="4">
+<div class="cell" data-execution_count="13">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieve image files on data path</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>im <span class="op">=</span> get_image_files(path)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check to see which images we cannot open</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>failed <span class="op">=</span> verify_images(im)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Number of images: </span><span class="sc">{</span><span class="bu">len</span>(im)<span class="sc">}</span><span class="ss"> | Number of failed: </span><span class="sc">{</span><span class="bu">len</span>(failed)<span class="sc">}</span><span class="ss"> | Remaining: </span><span class="sc">{</span><span class="bu">len</span>(im) <span class="op">-</span> <span class="bu">len</span>(failed)<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>failed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieve image files on data path</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>im <span class="op">=</span> get_image_files(data_path)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Check to see which images we cannot open</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>failed <span class="op">=</span> verify_images(im)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Number of images: </span><span class="sc">{</span><span class="bu">len</span>(im)<span class="sc">}</span><span class="ss"> | Number of failed: </span><span class="sc">{</span><span class="bu">len</span>(failed)<span class="sc">}</span><span class="ss"> | Remaining: </span><span class="sc">{</span><span class="bu">len</span>(im) <span class="op">-</span> <span class="bu">len</span>(failed)<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>failed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Number of images: 8577 | Number of failed: 0 | Remaining: 8577</code></pre>
+<pre><code>Number of images: 8685 | Number of failed: 108 | Remaining: 8577</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>(#0) []</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>(#108) [Path('data/validation_set/painting/1150.jpg'),Path('data/validation_set/painting/1600.jpg'),Path('data/validation_set/painting/1550.jpg'),Path('data/validation_set/painting/2200.jpg'),Path('data/validation_set/painting/1250.jpg'),Path('data/validation_set/painting/2225.jpg'),Path('data/validation_set/painting/0300.jpg'),Path('data/validation_set/painting/2275.jpg'),Path('data/validation_set/sculpture/170.jpg'),Path('data/validation_set/sculpture/106.jpg')...]</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="5">
+<div class="cell" data-execution_count="14">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>failed.<span class="bu">map</span>(Path.unlink)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>failed.<span class="bu">map</span>(Path.unlink)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>(#0) []</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>(#108) [None,None,None,None,None,None,None,None,None,None...]</code></pre>
 </div>
 </div>
 </section>
@@ -322,7 +302,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li>With images, we process our data with <code>ImageBlock</code> and set our target to single categories using <code>CategoryBlock</code></li>
 <li><code>get_image_files</code> can be used to get all our image data from a specified path</li>
-<li>We split our data into a training and valid dataset based on the grandparent directory each image is in using <code>GrandparentSplitter</code></li>
+<li>We’ll use our valid dataset as a testing dataset and split the training dataset into train and validation. We split randomly using <code>RandomSplitter</code> with a default 80-20 split.</li>
 <li>The labels for our image targets will use the name of the directory they are located in using <code>parent_label</code></li>
 <li>Every item will be resized to 460 pixel dimensions on the CPU</li>
 <li>We will apply a series of flip, rotate, zoom, warp, lighting transforms on whole batches of images using the GPU</li>
@@ -330,61 +310,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>For our task, we’ll spin up a function <code>get_dls</code> to quickly spin up dataloaders with different batch and image sizes.</p>
 <section id="dataloader-function" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="dataloader-function"><span class="header-section-number">4.1</span> Dataloader Function</h2>
-<div class="cell" data-execution_count="6">
+<div class="cell" data-execution_count="66">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_dls(bs: <span class="bu">int</span>, size: <span class="bu">int</span>) <span class="op">-&gt;</span> DataLoaders:</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a dataloader for an image recognition task with specified batch size and image size.</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">    # Parameters:</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co">    -   bs (int): Batch size.</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co">    -   size (int): Final size of individual images.</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">    # Returns:</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co">    -   DataLoaders: A dataloader that batches our image data with specific image and batch size.</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    db <span class="op">=</span> DataBlock(</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        blocks<span class="op">=</span>(ImageBlock(), CategoryBlock()),</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        get_items<span class="op">=</span>get_image_files,</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        splitter<span class="op">=</span>GrandparentSplitter(train_name<span class="op">=</span><span class="st">'training_set'</span>, valid_name<span class="op">=</span><span class="st">'validation_set'</span>),</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        get_y<span class="op">=</span>parent_label,</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        item_tfms<span class="op">=</span>Resize(<span class="dv">460</span>),</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        batch_tfms<span class="op">=</span>aug_transforms(size<span class="op">=</span>size, min_scale<span class="op">=</span><span class="fl">0.75</span>)</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> db.dataloaders(path, bs<span class="op">=</span>bs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_dls(bs: <span class="bu">int</span>, size: <span class="bu">int</span>) <span class="op">-&gt;</span> DataLoaders:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Creates a dataloader for an image recognition task with specified batch size and image size.</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co">    # Parameters:</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">    -   bs (int): Batch size.</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">    -   size (int): Final size of individual images.</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co">    # Returns:</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">    -   DataLoaders: A dataloader that batches our image data with specific image and batch size.</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    db <span class="op">=</span> DataBlock(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        blocks<span class="op">=</span>(ImageBlock(), CategoryBlock()),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        get_items<span class="op">=</span>get_image_files,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        splitter<span class="op">=</span>RandomSplitter(seed<span class="op">=</span><span class="dv">42</span>), </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        get_y<span class="op">=</span>parent_label,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        item_tfms<span class="op">=</span>Resize(<span class="dv">460</span>),</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        batch_tfms<span class="op">=</span>aug_transforms(size<span class="op">=</span>size, min_scale<span class="op">=</span><span class="fl">0.75</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> db.dataloaders(data_path <span class="op">/</span> <span class="st">'training_set'</span>, bs<span class="op">=</span>bs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>When we create our dataloader, we can verify that our splitter is working as we expect it to.</p>
-<div class="cell" data-execution_count="7">
+<div class="cell" data-execution_count="67">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_dls(<span class="dv">64</span>, <span class="dv">128</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(dls.train_ds), <span class="bu">len</span>(dls.valid_ds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_dls(<span class="dv">64</span>, <span class="dv">128</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(dls.train_ds), <span class="bu">len</span>(dls.valid_ds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>(7721, 856)</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="67">
+<pre><code>(6177, 1544)</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="8">
+<p>Now, let’s check out what images we have to work with using the <code>show_batch</code> function!</p>
+<div class="cell" data-execution_count="68">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Verifying that the number of images in each directory is the same</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>exts <span class="op">=</span> [<span class="st">'.jpg'</span>, <span class="st">'.jpeg'</span>, <span class="st">'.png'</span>]</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>([p <span class="cf">for</span> p <span class="kw">in</span> (path <span class="op">/</span> <span class="st">'training_set'</span>).rglob(<span class="st">'*'</span>) <span class="cf">if</span> p.suffix <span class="kw">in</span> exts]), <span class="bu">len</span>([p <span class="cf">for</span> p <span class="kw">in</span> (path <span class="op">/</span> <span class="st">'validation_set'</span>).rglob(<span class="st">'*'</span>) <span class="cf">if</span> p.suffix <span class="kw">in</span> exts])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>(7721, 856)</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="9">
-<details open="">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show an example batch of images</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>dls.show_batch()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show an example batch of images</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>dls.show_batch()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-12-output-1.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 </section>
@@ -396,65 +366,66 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Transfer learning is a method of using pretrained models that were trained on one task as a starting point for training models on a new task.</p>
 <p>For computer vision tasks, fastai makes initializing a pretrained model simple through <code>vision_learner</code>–by default, the <code>pretrained</code> parameter is <code>True</code>. When we use a pretrained model, the last layer is replaced with a new linear layer with the same number of outputs as our new transfer learning problem (in this case 5 classes). However, this new layer is randomly initialized so we will need to make sure to tune our model to correctly predict the different artwork types.</p>
 <p>To start, we will use the <strong>resnet50</strong> architecture and track the <code>accuracy</code> metric (percent of images predicted correctly).</p>
-<div class="cell" data-execution_count="33">
+<div class="cell" data-execution_count="130">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet50, metrics<span class="op">=</span>accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet50, metrics<span class="op">=</span>accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="learning-rate-finder" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="learning-rate-finder"><span class="header-section-number">5.1</span> Learning Rate Finder</h2>
-<p>For our model, we first need to select a good learning rate (LR) to start our training. Fastai implements an LR finder method <code>Learner.lr_find</code> based on Leslie Smith’s paper called <a href="https://arxiv.org/pdf/1506.01186.pdf">Cyclical Learning Rates for Training Neural Networks</a>.</p>
+<p>For our model, we first need to select a good learning rate to start our training. Fastai implements a learning rate finder method <code>Learner.lr_find</code> based on Leslie Smith’s paper called <a href="https://arxiv.org/pdf/1506.01186.pdf">Cyclical Learning Rates for Training Neural Networks</a>.</p>
 <p>Smith describes his approach as the following:</p>
 <blockquote class="blockquote">
 <p>There is a simple way to estimate reasonable minimum and maximum boundary values with one training run of the network for a few epochs. It is a “LR range test”; run your model for several epochs while letting the learning rate increase linearly between low and high LR values.</p>
 </blockquote>
 <p>Essentially, we check our training losses as we grow our learning rate to get an idea of what learning rate performs well.</p>
-<p>Fastai takes a slightly different approach: The model is test-trained with learning rates that grow exponentially from a low LR to a higher LR across a number of mini-batches. The process continues until we find a learning rate where the loss begins to diverge and increases significantly.</p>
-<p>What this boils down to is that in the fastai version we don’t necessarily need to run for multiple epochs to get an optimal LR as we are training for a set number of mini-batches.</p>
-<!-- Do I need this part? Maybe not. Seems wordy -->
-<p>Conveniently, <code>lr_find</code> gives us the loss vs.&nbsp;LR plot and also enables us to directly extract LRs that could be optimal based off different <em>suggestion</em> functions. For example, I will use <code>steep</code> which gets the LR with the steepest slope.</p>
-<div class="cell" data-execution_count="34">
+<p>Fastai takes a slightly different approach: The model is test-trained with learning rates that grow exponentially from a low learning rate to a higher learning rate across a number of mini-batches. The process continues until we find a learning rate where the loss begins to diverge and increases significantly.</p>
+<p>What this boils down to is that in the fastai version we don’t necessarily need to run for multiple epochs to get an optimal learning rate as we are training for a set number of mini-batches.</p>
+<p>Conveniently, <code>lr_find</code> gives us the loss vs.&nbsp;learning rate plot and also enables us to directly extract learning rates that could be optimal based off different <em>suggestion</em> functions. For example, we can use <code>steep</code> which gets the learning rate with the steepest slope.</p>
+<div class="cell" data-execution_count="131">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn.lr_find(suggest_funcs<span class="op">=</span>steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn.lr_find(suggest_funcs<span class="op">=</span>steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 
 <p>Log plot of loss vs.&nbsp;learning rate</p>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-14-output-2.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-11-output-2.png" class="img-fluid"></p>
 </div>
 </div>
 </section>
-<section id="cycle-idea" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="cycle-idea"><span class="header-section-number">5.2</span> 1cycle Idea</h2>
-<p>We can now start training our model! Using the <code>fit_one_cycle</code> method we are actually training our model with what is called the <strong>1cycle policy</strong>, an idea that again comes from Leslie Smith and changes our learning rate over the course of training. I won’t be going into close detail on how the 1cycle policy is implemented in the scope of this article. At a high level, we are starting at some initial LR, linearly increasing our LR after every batch up to a maximum LR, and from the maximum LR down to some minimum LR several magnitudes lower than our initial LR.</p>
-<p>The idea behind this all is to warm up our training with a low learning rate and use the high learning rate to help find minimums in our loss function that are flatter, allowing the model to generalize better. During the last segment of training, the descending learning rates help the optimizer avoid skipping over a steeper loss within the flatter areas. This process allows our model to converge faster and consequently achieve better results with lower iterations than traditional training methods. Smith calls this occurrence <strong>super-convergence.</strong></p>
-<div class="cell" data-execution_count="12">
+<section id="one-cycle-idea" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="one-cycle-idea"><span class="header-section-number">5.2</span> One-cycle Idea</h2>
+<p>We can now start training our model! Using the <code>fit_one_cycle</code> method we are actually training our model with what is called the <strong>one-cycle policy</strong>, an idea that again comes from Leslie Smith and changes our learning rate over the course of training. I won’t be going into close detail on how the 1cycle policy is implemented in the scope of this article.</p>
+<p>At a high level, we are starting at some initial learning rate, linearly increasing our learning rate after every batch up to a maximum learning rate, and from the maximum learning rate down to some minimum learning rate several magnitudes lower than our initial learning rate.</p>
+<p>The idea behind this all is to warm up our training with a low learning rate and use the high learning rate to help find minimums in our loss function that are flatter, allowing the model to generalize better.</p>
+<p>During the last segment of training, the descending learning rates help the optimizer avoid skipping over a steeper loss within the flatter areas. This process allows our model to converge faster and consequently achieve better results with lower iterations than traditional training methods. Smith calls this occurrence <strong>super-convergence.</strong></p>
+<div class="cell" data-execution_count="132">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_example_cycle(x_min, x_max, y_min, y_max, padding):</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.linspace(x_min, x_max, values <span class="op">+</span> padding)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    y1 <span class="op">=</span> np.linspace(y_min, y_max, values <span class="op">//</span> <span class="dv">2</span>, endpoint<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    y2 <span class="op">=</span> np.linspace(y_max, y_min, values <span class="op">//</span> <span class="dv">2</span>, endpoint<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    padded_values <span class="op">=</span> np.linspace(y_min, y_min <span class="op">*</span> <span class="fl">1e-2</span>, padding)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.concatenate((y1, y2, padded_values))</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    plt.plot(x, y)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Epochs'</span>)</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Learning rate'</span>)</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_example_cycle(x_min, x_max, y_min, y_max, padding):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.linspace(x_min, x_max, values <span class="op">+</span> padding)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    y1 <span class="op">=</span> np.linspace(y_min, y_max, values <span class="op">//</span> <span class="dv">2</span>, endpoint<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    y2 <span class="op">=</span> np.linspace(y_max, y_min, values <span class="op">//</span> <span class="dv">2</span>, endpoint<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    padded_values <span class="op">=</span> np.linspace(y_min, y_min <span class="op">*</span> <span class="fl">1e-2</span>, padding)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.concatenate((y1, y2, padded_values))</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    plt.plot(x, y)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">'Epochs'</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">'Learning rate'</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="13">
+<div class="cell" data-execution_count="133">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>plot_example_cycle(<span class="dv">0</span>, <span class="dv">40</span>, <span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plot_example_cycle(<span class="dv">0</span>, <span class="dv">40</span>, <span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div id="fig-1cycle-example" class="quarto-figure quarto-figure-center anchored">
@@ -468,11 +439,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- Now that I'm using fine_tune method this section needs a bit of revision -->
 <p>With transfer learning, our model has additional new layers that we can train for the problem we are trying to solve. At the start of training, we may not want to completely readjust the weights in the model’s previously learned layers because they account for high-level details of the image like line and shape.</p>
 <p>In a pretrained model, the previous trained layers start out <strong>frozen</strong>, meaning their weights aren’t updated during training unless we unfreeze them. Later, we will unfreeze all the layers and use a range of learning rates to help adjust them slightly for our artwork classification.</p>
-<p>Fastai recommends training the frozen pretrained model for a few epochs before training the full pretrained model. We’ll start with 3 epochs frozen using the learning rate we found before and then train the full model for 25 epochs. We can get an idea of how our error rates changes across training from here. Our losses along with our metrics will be useful in determining if we’ve fitted a decent model or whether we are underfitting or overfitting.</p>
-<div class="cell" data-execution_count="35">
+<p>Fastai recommends training the frozen pretrained model for a few epochs before training the full pretrained model. We’ll start with 3 epochs frozen using the learning rate we found before and then train the full model for 15 epochs. We can get an idea of how our error rates changes across training from here. Our losses along with our metrics will be useful in determining if we’ve fitted a decent model or whether we are underfitting or overfitting.</p>
+<div class="cell" data-execution_count="134">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
@@ -488,49 +459,50 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td>0</td>
-<td>0.632305</td>
-<td>0.351879</td>
-<td>0.885514</td>
-<td>00:11</td>
+<td>0.724909</td>
+<td>0.375700</td>
+<td>0.872409</td>
+<td>00:10</td>
 </tr>
 <tr class="even">
 <td>1</td>
-<td>0.367901</td>
-<td>0.266535</td>
-<td>0.911215</td>
-<td>00:11</td>
+<td>0.425733</td>
+<td>0.282166</td>
+<td>0.894430</td>
+<td>00:10</td>
 </tr>
 <tr class="odd">
 <td>2</td>
-<td>0.290731</td>
-<td>0.255560</td>
-<td>0.912383</td>
-<td>00:11</td>
+<td>0.341481</td>
+<td>0.281355</td>
+<td>0.898964</td>
+<td>00:10</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div class="cell" data-execution_count="36">
+<p>Now we can unfreeze the layers and find a new learning rate to train on:</p>
+<div class="cell" data-execution_count="135">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>learn.unfreeze()</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>learn.lr_find()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>learn.unfreeze()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>learn.lr_find()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 
 </div>
-<div class="cell-output cell-output-display" data-execution_count="36">
-<pre><code>SuggestedLRs(valley=3.0199516913853586e-05)</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="135">
+<pre><code>SuggestedLRs(valley=3.630780702224001e-05)</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-18-output-3.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-15-output-3.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="37">
+<div class="cell" data-execution_count="136">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">30</span>, <span class="fl">1e-5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">15</span>, <span class="fl">1e-5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
@@ -546,213 +518,108 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td>0</td>
-<td>0.278328</td>
-<td>0.252081</td>
-<td>0.913551</td>
+<td>0.271441</td>
+<td>0.265777</td>
+<td>0.904145</td>
 <td>00:12</td>
 </tr>
 <tr class="even">
 <td>1</td>
-<td>0.270599</td>
-<td>0.246448</td>
-<td>0.917056</td>
-<td>00:12</td>
+<td>0.296644</td>
+<td>0.251294</td>
+<td>0.908031</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>2</td>
-<td>0.257108</td>
-<td>0.233751</td>
-<td>0.920561</td>
-<td>00:12</td>
+<td>0.278119</td>
+<td>0.242461</td>
+<td>0.913860</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>3</td>
-<td>0.248420</td>
-<td>0.236578</td>
-<td>0.913551</td>
-<td>00:12</td>
+<td>0.229598</td>
+<td>0.223756</td>
+<td>0.912565</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>4</td>
-<td>0.225075</td>
-<td>0.217247</td>
-<td>0.922897</td>
-<td>00:12</td>
+<td>0.219047</td>
+<td>0.216550</td>
+<td>0.919689</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>5</td>
-<td>0.219640</td>
-<td>0.218755</td>
-<td>0.921729</td>
-<td>00:12</td>
+<td>0.199054</td>
+<td>0.201101</td>
+<td>0.922280</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>6</td>
-<td>0.193035</td>
-<td>0.220623</td>
-<td>0.927570</td>
+<td>0.181958</td>
+<td>0.206481</td>
+<td>0.924223</td>
 <td>00:12</td>
 </tr>
 <tr class="even">
 <td>7</td>
-<td>0.181702</td>
-<td>0.207903</td>
-<td>0.929907</td>
-<td>00:12</td>
+<td>0.153299</td>
+<td>0.190849</td>
+<td>0.929404</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>8</td>
-<td>0.153848</td>
-<td>0.203974</td>
-<td>0.931075</td>
-<td>00:13</td>
+<td>0.152870</td>
+<td>0.189614</td>
+<td>0.929404</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>9</td>
-<td>0.140883</td>
-<td>0.205168</td>
-<td>0.928738</td>
-<td>00:12</td>
+<td>0.144226</td>
+<td>0.188413</td>
+<td>0.929404</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>10</td>
-<td>0.122441</td>
-<td>0.198469</td>
-<td>0.932243</td>
-<td>00:12</td>
+<td>0.139311</td>
+<td>0.187798</td>
+<td>0.931995</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>11</td>
-<td>0.122553</td>
-<td>0.203679</td>
-<td>0.927570</td>
-<td>00:12</td>
+<td>0.134395</td>
+<td>0.202066</td>
+<td>0.927461</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>12</td>
-<td>0.105032</td>
-<td>0.212182</td>
-<td>0.929907</td>
-<td>00:12</td>
+<td>0.142067</td>
+<td>0.192524</td>
+<td>0.927461</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>13</td>
-<td>0.107883</td>
-<td>0.198044</td>
-<td>0.936916</td>
-<td>00:13</td>
+<td>0.129715</td>
+<td>0.187295</td>
+<td>0.928756</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>14</td>
-<td>0.100362</td>
-<td>0.198456</td>
-<td>0.939252</td>
-<td>00:13</td>
-</tr>
-<tr class="even">
-<td>15</td>
-<td>0.093048</td>
-<td>0.206936</td>
-<td>0.932243</td>
-<td>00:13</td>
-</tr>
-<tr class="odd">
-<td>16</td>
-<td>0.077934</td>
-<td>0.204801</td>
-<td>0.938084</td>
-<td>00:12</td>
-</tr>
-<tr class="even">
-<td>17</td>
-<td>0.081075</td>
-<td>0.208896</td>
-<td>0.933411</td>
-<td>00:13</td>
-</tr>
-<tr class="odd">
-<td>18</td>
-<td>0.076961</td>
-<td>0.210113</td>
-<td>0.934579</td>
-<td>00:12</td>
-</tr>
-<tr class="even">
-<td>19</td>
-<td>0.065377</td>
-<td>0.203140</td>
-<td>0.932243</td>
-<td>00:13</td>
-</tr>
-<tr class="odd">
-<td>20</td>
-<td>0.063294</td>
-<td>0.201389</td>
-<td>0.939252</td>
-<td>00:12</td>
-</tr>
-<tr class="even">
-<td>21</td>
-<td>0.063553</td>
-<td>0.204729</td>
-<td>0.935748</td>
-<td>00:13</td>
-</tr>
-<tr class="odd">
-<td>22</td>
-<td>0.059901</td>
-<td>0.220824</td>
-<td>0.934579</td>
-<td>00:12</td>
-</tr>
-<tr class="even">
-<td>23</td>
-<td>0.053123</td>
-<td>0.210733</td>
-<td>0.933411</td>
-<td>00:13</td>
-</tr>
-<tr class="odd">
-<td>24</td>
-<td>0.054386</td>
-<td>0.207903</td>
-<td>0.939252</td>
-<td>00:12</td>
-</tr>
-<tr class="even">
-<td>25</td>
-<td>0.057231</td>
-<td>0.219750</td>
-<td>0.935748</td>
-<td>00:12</td>
-</tr>
-<tr class="odd">
-<td>26</td>
-<td>0.056672</td>
-<td>0.218769</td>
-<td>0.935748</td>
-<td>00:12</td>
-</tr>
-<tr class="even">
-<td>27</td>
-<td>0.047327</td>
-<td>0.207138</td>
-<td>0.935748</td>
-<td>00:13</td>
-</tr>
-<tr class="odd">
-<td>28</td>
-<td>0.060546</td>
-<td>0.209229</td>
-<td>0.938084</td>
-<td>00:12</td>
-</tr>
-<tr class="even">
-<td>29</td>
-<td>0.053616</td>
-<td>0.211565</td>
-<td>0.936916</td>
-<td>00:12</td>
+<td>0.125194</td>
+<td>0.191619</td>
+<td>0.930699</td>
+<td>00:11</td>
 </tr>
 </tbody>
 </table>
@@ -761,66 +628,107 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="interpreting-the-loss-curves-further-training" class="level2" data-number="5.3">
 <h2 data-number="5.3" class="anchored" data-anchor-id="interpreting-the-loss-curves-further-training"><span class="header-section-number">5.3</span> Interpreting the Loss Curves, Further Training?</h2>
-<p>After training our model, we will see how our training and validation losses have changed over the course of our iteration / epochs using <strong>loss curves</strong>. Loss curves won’t provide the entire story of our model but we’ll have a broad picture of how our model performs over the selected dataset and batch size.</p>
-<div class="cell" data-execution_count="39">
+<p>After training our model, we will see how our training and validation losses have changed over the course of our iteration / epochs using <strong>loss curves</strong>. Loss curves won’t provide the entire story of our model but we’ll have a broad picture of how our model performs over the selected dataset and batch size. <a href="#fig-loss-iterations">Figure&nbsp;2</a> shows the loss curves across the training iterations.</p>
+<div class="cell" data-execution_count="137">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>learn.recorder.plot_loss()</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Iterations"</span>)</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Loss"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>learn.recorder.plot_loss()</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Iterations"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Loss"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Loss Curves Across Iterations'</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="39">
-<pre><code>Text(0, 0.5, 'Loss')</code></pre>
-</div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-20-output-2.png" class="img-fluid"></p>
+<div id="fig-loss-iterations" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-loss-iterations-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;2: Loss curves across the model’s training iterations</figcaption>
+</figure>
+</div>
 </div>
 </div>
 <p>Initially, our validation loss starts out lower than our training loss but our training loss quickly converges as our training progresses.</p>
-<p>We should note that we reach a point where our validation loss is higher than our training loss. The former also does not seem to converge any more which leads us to an important question: are we <strong>overfitting</strong>?</p>
+<p>We should note that we reach a point where our validation loss is higher than our training loss and stagnates a bit. The model is becoming overconfident in its predictions and we have to ask ourselves: are we <strong>overfitting</strong>?</p>
+<p><a href="#fig-loss-epochs">Figure&nbsp;3</a> shows the loss curves across the training epochs in case we need to go back and retrain our model to a previous epoch.</p>
+<div class="cell" data-execution_count="140">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">0</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>valid_loss <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">1</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>plt.plot(train_loss)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>plt.plot(valid_loss)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Epoch'</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Loss'</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Loss Curves Across Epochs'</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-loss-epochs" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-loss-epochs-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;3: Loss curves across training epochs</figcaption>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="overfitting" class="level2" data-number="5.4">
 <h2 data-number="5.4" class="anchored" data-anchor-id="overfitting"><span class="header-section-number">5.4</span> Overfitting</h2>
 <p>Overfitting occurs when we have trained for too long and the model begins to “memorize” the training data while failing to generalize well to new data.</p>
-<p>When we look at our losses, we might decide an increasing validation loss with a continually decreasing training loss means we are overfitting. However, this is not necessarily the case–one key takeaway from fastai is that we should be checking if our performance metric is getting worse to decide if the model is overfitting.</p>
-<div class="cell" data-execution_count="41">
+<p>When we look at our losses visually, we can see that there is an emerging gap between our training and validation loss and the latter seems to stagnate. How big of a gap is too big? It’s hard to say because it depends on a variety of factors like the scale of the dataset.</p>
+<p>We could stop early at a point where the gap isn’t as large, but with one-cycle training that may not be a good idea because we may not allow our learning rate to reach the small values that would benefit our training.</p>
+<p>However, one key takeaway from fastai is that we should be checking to see if our performance metrics are getting significantly worse to decide is the model is overfitting. It’s not enough to view the losses alone.</p>
+<p><a href="#fig-accuracy-epochs">Figure&nbsp;4</a> shows the accuracy across the training epochs.</p>
+<div class="cell" data-execution_count="141">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>accuracy_metric <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">2</span>)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Highest accuracy during last run: </span><span class="sc">{</span>np<span class="sc">.</span>argmax(accuracy_metric)<span class="sc">}</span><span class="ss">'</span>)</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Accuracy'</span>)</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Epoch'</span>)</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>plt.xticks(np.arange(<span class="dv">0</span>, <span class="bu">len</span>(accuracy_metric) <span class="op">+</span> <span class="dv">1</span>, <span class="dv">5</span>))</span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>plt.plot(accuracy_metric)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>accuracy_metric <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">2</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>highest_accuracy_epoch <span class="op">=</span> np.argmax(accuracy_metric)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Highest accuracy during last run: </span><span class="sc">{</span>highest_accuracy_epoch<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Accuracy'</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Epoch'</span>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Accuracy Across Epochs'</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>plt.xticks(np.arange(<span class="dv">0</span>, <span class="bu">len</span>(accuracy_metric) <span class="op">+</span> <span class="dv">1</span>, <span class="dv">5</span>))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>plt.plot(accuracy_metric)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(highest_accuracy_epoch, accuracy_metric[highest_accuracy_epoch], color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Highest accuracy during last run: 14</code></pre>
+<pre><code>Highest accuracy during last run: 10</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-21-output-2.png" class="img-fluid"></p>
+<div id="fig-accuracy-epochs" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-accuracy-epochs-output-2.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;4: Accuracy across the training epochs</figcaption>
+</figure>
 </div>
 </div>
-<p>Our highest accuracy is at epoch 14 and it doesn’t show clear signs of improvement with additional training. If we take into account both our validation loss and metric, then our model <em>might</em> be overfitting but it’s not clear. However, we have a few options here! We could introduce regularization, choose a deeper architecture or even rerun our model with a lower number of epochs and adjust from there. In this case, we will select a deeper architecture using discriminative learning rates. Using a deeper model, we might be able to learn the patterns of our data better.</p>
+</div>
+<p>Our highest accuracy is at <strong>epoch 10</strong> but the accuracy appears to be flattening out a bit overall. If we take into account both our validation loss and metric, then our model <em>might</em> be overfitting. Fortunately, we have a few options here! We could introduce weight decay or even rerun our model with a lower number of epochs and adjust from there. In this case, we will add some weight decay using discriminative learning rates.</p>
 <p>We should keep in mind that our performance metric is what ultimately matters in practice.</p>
 <p>As Jeremy Howard states:</p>
 <blockquote class="blockquote">
 <p>“In the end what matters is your accuracy, or more generally your chosen metrics, not the loss. The loss is just the function we’ve given the computer to help us to optimize.”</p>
 <p>“Remember, it’s not just that we’re looking for the validation loss to get worse, but the actual metrics. Your validation loss will first get worse during training because the model gets overconfident, and only later will get worse because it is incorrectly memorizing the data. We only care in practice about the latter issue. Remember, our loss function is just something that we use to allow our optimizer to have something it can differentiate and optimize; it’s not actually the thing we care about in practice.”</p>
 </blockquote>
-<p>To really evaluate our model’s performance, we would run our model on a representative test data set that it has never seen before. This would help us get a good idea of our model’s practical performance.</p>
-<div class="cell" data-execution_count="44">
+<p>To really evaluate our model’s performance, we would run our model on a representative test data set that it has never seen before. This will allow us to get a more honest assessment of how our model is doing and we don’t want to report accuracy on our training model alone. Once we’ve decided on a model, we’ll look at how we can use the images we didn’t use for training as a test set.</p>
+<div class="cell" data-execution_count="147">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reinitialize our model to restart training</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet101, metrics<span class="op">=</span>accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reinitialize our model to restart training</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet50, metrics<span class="op">=</span>accuracy, wd<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="45">
+<div class="cell" data-execution_count="148">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn.lr_find(suggest_funcs<span class="op">=</span>steep, show_plot<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn.lr_find(suggest_funcs<span class="op">=</span>steep, show_plot<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
@@ -836,49 +744,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td>0</td>
-<td>0.630548</td>
-<td>0.262199</td>
-<td>0.907710</td>
-<td>00:14</td>
+<td>0.872535</td>
+<td>0.414252</td>
+<td>0.854922</td>
+<td>00:10</td>
 </tr>
 <tr class="even">
 <td>1</td>
-<td>0.352523</td>
-<td>0.220467</td>
-<td>0.919393</td>
-<td>00:14</td>
+<td>0.518426</td>
+<td>0.336665</td>
+<td>0.879534</td>
+<td>00:10</td>
 </tr>
 <tr class="odd">
 <td>2</td>
-<td>0.275075</td>
-<td>0.213857</td>
-<td>0.920561</td>
-<td>00:14</td>
+<td>0.387601</td>
+<td>0.325532</td>
+<td>0.884715</td>
+<td>00:10</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<div class="cell" data-execution_count="46">
+<div class="cell" data-execution_count="149">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>learn.unfreeze()</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>learn.lr_find()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>learn.unfreeze()</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>learn.lr_find()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 
 </div>
-<div class="cell-output cell-output-display" data-execution_count="46">
-<pre><code>SuggestedLRs(valley=1.737800812406931e-05)</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="149">
+<pre><code>SuggestedLRs(valley=0.00013182566908653826)</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-24-output-3.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-22-output-3.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="47">
+<div class="cell" data-execution_count="150">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">10</span>, lr_max<span class="op">=</span><span class="bu">slice</span>(<span class="fl">1e-6</span>, <span class="fl">1e-4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">15</span>, lr_max<span class="op">=</span><span class="bu">slice</span>(<span class="fl">1e-6</span>, <span class="fl">1e-4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
@@ -894,93 +802,211 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td>0</td>
-<td>0.271231</td>
-<td>0.216878</td>
-<td>0.915888</td>
-<td>00:17</td>
+<td>0.348780</td>
+<td>0.305213</td>
+<td>0.893782</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>1</td>
-<td>0.233810</td>
-<td>0.186462</td>
-<td>0.928738</td>
-<td>00:17</td>
+<td>0.356950</td>
+<td>0.302995</td>
+<td>0.891839</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>2</td>
-<td>0.212894</td>
-<td>0.168020</td>
-<td>0.928738</td>
-<td>00:17</td>
+<td>0.313423</td>
+<td>0.268401</td>
+<td>0.902202</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>3</td>
-<td>0.175912</td>
-<td>0.168379</td>
-<td>0.927570</td>
-<td>00:17</td>
+<td>0.268710</td>
+<td>0.242577</td>
+<td>0.911269</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>4</td>
-<td>0.156709</td>
-<td>0.168505</td>
-<td>0.933411</td>
-<td>00:17</td>
+<td>0.239830</td>
+<td>0.247199</td>
+<td>0.913212</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>5</td>
-<td>0.136558</td>
-<td>0.161048</td>
-<td>0.948598</td>
-<td>00:17</td>
+<td>0.214128</td>
+<td>0.237627</td>
+<td>0.913212</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>6</td>
-<td>0.124741</td>
-<td>0.157284</td>
-<td>0.936916</td>
-<td>00:17</td>
+<td>0.189272</td>
+<td>0.214587</td>
+<td>0.919689</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>7</td>
-<td>0.105511</td>
-<td>0.157003</td>
-<td>0.943925</td>
-<td>00:18</td>
+<td>0.174895</td>
+<td>0.214508</td>
+<td>0.919041</td>
+<td>00:11</td>
 </tr>
 <tr class="odd">
 <td>8</td>
-<td>0.105623</td>
-<td>0.155143</td>
-<td>0.947430</td>
-<td>00:17</td>
+<td>0.153856</td>
+<td>0.211521</td>
+<td>0.920337</td>
+<td>00:11</td>
 </tr>
 <tr class="even">
 <td>9</td>
-<td>0.108300</td>
-<td>0.154238</td>
-<td>0.945093</td>
-<td>00:18</td>
+<td>0.137692</td>
+<td>0.201288</td>
+<td>0.927461</td>
+<td>00:11</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>0.137655</td>
+<td>0.202045</td>
+<td>0.927461</td>
+<td>00:11</td>
+</tr>
+<tr class="even">
+<td>11</td>
+<td>0.133422</td>
+<td>0.198879</td>
+<td>0.927461</td>
+<td>00:11</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>0.126204</td>
+<td>0.191793</td>
+<td>0.928756</td>
+<td>00:11</td>
+</tr>
+<tr class="even">
+<td>13</td>
+<td>0.117809</td>
+<td>0.196178</td>
+<td>0.926166</td>
+<td>00:11</td>
+</tr>
+<tr class="odd">
+<td>14</td>
+<td>0.116607</td>
+<td>0.195831</td>
+<td>0.928756</td>
+<td>00:11</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>We improved our accuracy up to around 94% by using a deeper model with discriminative learning rates. However, every choice has tradeoffs. Training a deeper model takes more time in general and in our low-risk context the increase in accuracy could be neglible. Let’s take a closer look at how our fine-tuned model is doing on our image set.</p>
-<div class="cell" data-execution_count="48">
+<p>Our accuracy is about the same, but our loss curves a bit smoother and our validation loss in particular shows a smoother, more consistent decreasing trend. For now, we’ll move forward with this model.</p>
+<div class="cell" data-execution_count="155">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>learn.recorder.plot_loss()</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Iterations"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Loss"</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Loss Curves Across Iterations'</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-loss-iterations-wd" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-loss-iterations-wd-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;5: Loss curves across the model’s training iterations</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="156">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">0</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>valid_loss <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">1</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>plt.plot(train_loss)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>plt.plot(valid_loss)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Epoch'</span>)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Loss'</span>)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Loss Curves Across Epochs'</span>)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-loss-epochs-wd" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-loss-epochs-wd-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;6: Loss curves across training epochs</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="158">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>accuracy_metric <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">2</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>highest_accuracy_epoch <span class="op">=</span> np.argmax(accuracy_metric)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Highest accuracy during last run: </span><span class="sc">{</span>highest_accuracy_epoch<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Accuracy'</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Epoch'</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Accuracy Across Epochs'</span>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>plt.xticks(np.arange(<span class="dv">0</span>, <span class="bu">len</span>(accuracy_metric) <span class="op">+</span> <span class="dv">1</span>, <span class="dv">5</span>))</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>plt.plot(accuracy_metric)</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(highest_accuracy_epoch, accuracy_metric[highest_accuracy_epoch])</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Highest accuracy during last run: 12</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-accuracy-epochs-wd" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-accuracy-epochs-wd-output-2.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;7: Accuracy across the training epochs</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Our accuracy metric seems to be increasing overall. The model is definitely learning patterns about the data and seems like it could potentially generalize well to similar data.</p>
+<p>We can use a confusion matrix to see the number of correctly classified and misclassified images on our training set. <a href="#fig-confusion-matrix">Figure&nbsp;8</a> displays the confusion matrix for the model we just fine-tuned.</p>
+<div id="fig-confusion-matrix" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
 <details open="">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>interp <span class="op">=</span> ClassificationInterpretation.from_learner(learn)</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>interp.plot_confusion_matrix()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display">
+<div id="fig-confusion-matrix-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
 
+<figcaption class="figure-caption">(a) Confusion matrix on the training set</figcaption>
+</figure>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-26-output-2.png" class="img-fluid"></p>
+<div id="fig-confusion-matrix-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-confusion-matrix-output-2.png" class="img-fluid figure-img" data-ref-parent="fig-confusion-matrix"></p>
+<figcaption class="figure-caption">(b)</figcaption>
+</figure>
 </div>
 </div>
-<div class="cell" data-execution_count="51">
+<figcaption class="figure-caption">Figure&nbsp;8: <strong>?(caption)</strong></figcaption>
+</figure>
+</div>
+<p>We can also display a report with common classification metrics like precision, recall, and the F1-score. For this project, we are mainly focused on the F1-score.</p>
+<p>The weighted F1-score is the the mean of all the class F1 scores while taking into account the number of occurrences in each class. In general, we are aiming for a balance between precision and recall on a scale between 0 and 1. Our model achieved a weighted F1-score of <strong>0.930</strong> on the training set.</p>
+<div class="cell" data-execution_count="160">
 <details open="">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>interp.print_classification_report()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -991,74 +1017,166 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>              precision    recall  f1-score   support
 
-    drawings       0.85      0.80      0.83       122
-   engraving       0.79      0.86      0.82        84
- iconography       0.97      1.00      0.99       231
-    painting       0.98      0.96      0.97       228
-   sculpture       0.99      0.99      0.99       191
+    drawings       0.83      0.69      0.75       213
+   engraving       0.74      0.88      0.81       158
+ iconography       0.97      0.99      0.98       418
+    painting       0.97      0.96      0.96       409
+   sculpture       0.97      0.99      0.98       346
 
-    accuracy                           0.95       856
-   macro avg       0.92      0.92      0.92       856
-weighted avg       0.95      0.95      0.95       856
+    accuracy                           0.93      1544
+   macro avg       0.90      0.90      0.90      1544
+weighted avg       0.93      0.93      0.93      1544
 </code></pre>
 </div>
 </div>
-<p>The weighted F1-score is the the mean of all the class F1 scores while taking into account the number of occurrences in each class. The score has a range from 0 to 1. Our model achieved a weighted F1-score of <strong>0.95</strong>. Not bad!</p>
-<p>In production, we should take these results with a grain of salt since we haven’t done any true performance testing. But it’s fascinating that we can achieve such results with just a bit of conceptual understanding and a few lines of code!</p>
+<p><a href="#fig-top-losses">Figure&nbsp;9</a> shows the top 10 losses of training images predicted by our model. We can use this to get a visual idea of what kinds of images our model might be misclassifying.</p>
+<p>In particular, from both the classification report and the top losses our model seems to misclassify engravings and drawings more than other types of art. Maybe not all images are standardized and there are definitely tough cases where the line between painting, drawing, and iconography are blurry.</p>
+<div id="fig-top-losses" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>interp.plot_top_losses(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="fig-top-losses-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+
+<figcaption class="figure-caption">(a) Top 10 losses of images in the training set</figcaption>
+</figure>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-top-losses-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="index_files/figure-html/fig-top-losses-output-2.png" class="img-fluid figure-img" data-ref-parent="fig-top-losses"></p>
+<figcaption class="figure-caption">(b)</figcaption>
+</figure>
+</div>
+</div>
+<figcaption class="figure-caption">Figure&nbsp;9: <strong>?(caption)</strong></figcaption>
+</figure>
+</div>
+<!-- TODO: Discuss the differences in precision and recall between the different types -->
+<p>It’s fascinating that we are able to classify images at all with these results with a bit of conceptual understanding and a few lines of code! However, we still need to evaluate on the test set for reporting purposes.</p>
 </section>
 </section>
 <section id="prediction-inference" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Prediction / Inference</h1>
 <p>The last thing I want to cover is how we can use our newly trained model to make predictions on new artwork images. We first export our model:</p>
-<div class="cell" data-execution_count="52">
+<div class="cell" data-execution_count="163">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save model into models/</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> Path(<span class="st">'models'</span>)</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>learn.export(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save model into models/</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> Path(<span class="st">'models'</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>learn.export(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="55">
+<div class="cell" data-execution_count="164">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load model and display the unique classes that can be predicted by the model</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>artwork_model <span class="op">=</span> load_learner(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>artwork_model.dls.vocab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load model and display the unique classes that can be predicted by the model</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>artwork_model <span class="op">=</span> load_learner(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>artwork_model.dls.vocab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="55">
+<div class="cell-output cell-output-display" data-execution_count="164">
 <pre><code>['drawings', 'engraving', 'iconography', 'painting', 'sculpture']</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="71">
+<p>After retrieving our model, we need to supply our test images as a dataloader. Call the <code>test_dl</code> method on our dataloaders object will allow us to apply all the transformations we used in training and instantly format the test images to be input to the model</p>
+<div class="cell" data-execution_count="170">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieve the image for inference</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>inf_path <span class="op">=</span> Path(<span class="st">'inference'</span>)</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>img_inf <span class="op">=</span> PILImage.create(inf_path <span class="op">/</span> <span class="st">'drawing_1.jpeg'</span>)</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>img_inf.to_thumb(<span class="dv">400</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>test_set_images <span class="op">=</span> get_image_files(data_path <span class="op">/</span> <span class="st">'validation_set'</span>)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>test_dl <span class="op">=</span> dls.test_dl(test_set_images, with_labels<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="71">
-<p><img src="index_files/figure-html/cell-30-output-1.png" class="img-fluid"></p>
 </div>
-</div>
-<div class="cell" data-execution_count="69">
+<div class="cell" data-execution_count="177">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a list of individual probabilities for each class</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(<span class="bu">zip</span>(artwork_model.dls.vocab, artwork_model.predict(img_inf)[<span class="dv">2</span>] <span class="op">*</span> <span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>preds, targs <span class="op">=</span> artwork_model.get_preds(dl<span class="op">=</span>test_dl)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>preds, targs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 
 </div>
-<div class="cell-output cell-output-display" data-execution_count="69">
-<pre><code>[('drawings', tensor(77.8390)),
- ('engraving', tensor(22.1252)),
- ('iconography', tensor(0.0320)),
- ('painting', tensor(0.0001)),
- ('sculpture', tensor(0.0037))]</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="177">
+<pre><code>(tensor([[3.6132e-07, 8.8536e-08, 1.0000e+00, 1.3703e-09, 3.7980e-11],
+         [3.4371e-08, 2.7954e-07, 1.0000e+00, 2.0091e-08, 6.7020e-09],
+         [1.7184e-06, 1.5358e-06, 1.0000e+00, 4.3859e-07, 6.3248e-08],
+         ...,
+         [9.9998e-01, 1.4365e-05, 4.0653e-07, 2.1398e-06, 3.4519e-06],
+         [4.4683e-01, 1.1235e-01, 3.6556e-01, 7.0459e-02, 4.8002e-03],
+         [9.9722e-01, 2.7641e-03, 7.1401e-06, 8.3320e-06, 4.2532e-06]]),
+ tensor([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+         3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))</code></pre>
 </div>
 </div>
-<p>Our model correctly predicts that our image is a drawing with a 77.8% probability.</p>
+<div class="cell" data-execution_count="178">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a list of individual probabilities for each class</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># list(zip(artwork_model.dls.vocab, artwork_model.predict(img_inf)[2] * 100))</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>pred_labels <span class="op">=</span> preds.argmax(dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>(pred_labels <span class="op">==</span> targs).<span class="bu">float</span>().mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="178">
+<pre><code>tensor(0.9264)</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="180">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(targs, pred_labels, target_names<span class="op">=</span>artwork_model.dls.vocab, digits<span class="op">=</span><span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>              precision    recall  f1-score   support
+
+    drawings     0.7983    0.7787    0.7884       122
+   engraving     0.7711    0.7619    0.7665        84
+ iconography     0.9662    0.9913    0.9786       231
+    painting     0.9688    0.9518    0.9602       228
+   sculpture     0.9741    0.9843    0.9792       191
+
+    accuracy                         0.9264       856
+   macro avg     0.8957    0.8936    0.8946       856
+weighted avg     0.9256    0.9264    0.9259       856
+</code></pre>
+</div>
+</div>
+<p>On our test set, the model achieved an overall accuracy of <strong>92.6%</strong> and a weighted F1-score of <strong>0.926</strong>. Without going into too many optimizations, we were able to find a model that performed remarkably on our artwork data. We applied transfer learning, learned how to determine learning rates with the learning rate finder, and used one-cycle to train a deep learning model with a funny eye for art! Along the way, we also explored important tools for diagnosing our model like loss curves and classification reports.</p>
+<p>Although it’s outside the scope of this article, we could now take the next step and retrain our model with the full data for deployment. We would be able to evaluate the model on new data that users are feeding to the model!</p>
 </section>
 <section id="further-steps-moving-forward" class="level1" data-number="7">
 <h1 data-number="7"><span class="header-section-number">7</span> Further Steps / Moving Forward</h1>
