@@ -8,6 +8,8 @@ website:
       - about.qmd
       - icon: github
         href: https://github.com/yangrchen
+  repo-url: https://github.com/yangrchen/cracking-data-yang
+  repo-actions: [issue]
 format:
   html:
     highlight-style: dracula

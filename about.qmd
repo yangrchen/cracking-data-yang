@@ -14,6 +14,8 @@ about:
 
 ---
 
-**Cracking Data** is all about my love for experimenting with data. It's a collection of articles which help explain awesome tools, concepts, and projects through the context of disciplines that I am passionate about like art and martial arts!
+**Cracking Data** is all about my love for experimenting with data. It's a collection of written projects which help explain awesome data tools and concepts disciplines that I am passionate about like art!
 
-Who am I? I’m a data science Master’s student who's interested in AI, deep learning, and explainable data science. I aim to keep my work fun and informative so others might be inspired to share their own experiments. 
+Who am I? I’m a data science Master's student at the [Institute for Advanced Analytics](https://analytics.ncsu.edu/?page_id=243) who's interested in AI, deep learning, and explainable data science. I aim to keep my work fun and informative so others might be inspired to share their own experiments. 
+
+To give feedback, ask questions, or share funny stories you can find me on [LinkedIn](https://linkedin.com/in/yangrchen) or email [rchen28@ncsu.edu](mailto:rchen28@ncsu.edu).
