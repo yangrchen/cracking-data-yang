@@ -396,34 +396,37 @@ Figure&nbsp;1: A sample bar chart of the most frequent names
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&lt;</span> <span class="dv">2</span>:</span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(ch1, ch2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>. k
-k r
-r e
-e k
-k i
-i i
-i r
-r  
-  u
-u l
-l u
-u a
-a n
-n .
-. l
-l l
-l t
-t y
-y l
-l n
-n  
-  t
-t o
+<pre><code>. r
+r i
+i z
+z o
+o m
+m p
+p h
+h  
+  a
+a u
+u v
+v r
+r y
+y t
+t l
+l a
+a r
+r .
+. m
+m o
+o l
+l d
+d o
 o r
-r a
-a t
+r  
+  t
 t e
-e .</code></pre>
+e l
+l i
+i n
+n .</code></pre>
 </div>
 </div>
 <div id="cell-11" class="cell" data-execution_count="6">
@@ -612,8 +615,8 @@ Figure&nbsp;2: Plot of negative log function
 <span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>nll <span class="op">=</span> <span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>nll<span class="op">/</span>n_ele <span class="op">=</span> <span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>nll = tensor(2235483.2500)
-nll/n_ele = tensor(2.5296)</code></pre>
+<pre><code>nll = tensor(2235438.5000)
+nll/n_ele = tensor(2.5295)</code></pre>
 </div>
 </div>
 <p>Great! We now have a metric to summarize our classifier to compare with other models. We might be interested in seeing the loss from our uniform, equal probability model. Let’s try that out now.</p>
@@ -707,7 +710,7 @@ nll/n_ele = tensor(4.1786)</code></pre>
 <h1>Trigram Model</h1>
 <p>In the trigram model, a sequence of 2 characters will predict the third one. In <code>abcd</code>, <code>ab -&gt; c</code>. One way we can represent this is by increasing our frequency tensor’s dimension to 3. Each dimension will represent the occurrence of each character in a trigram.</p>
 <p>Using a 3D tensor instead of a 2D tensor (<span class="math inline">\(29^2 \times 29\)</span> where each row represents a bigram predicting the next character) will also allow us to use the same encoder and decoder we used before.</p>
-<div id="cell-42" class="cell" data-execution_count="34">
+<div id="cell-42" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> torch.zeros((<span class="bu">len</span>(stoi), <span class="bu">len</span>(stoi), <span class="bu">len</span>(stoi)), dtype<span class="op">=</span>torch.int32)</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> names:</span>
@@ -717,7 +720,7 @@ nll/n_ele = tensor(4.1786)</code></pre>
 <span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>        N[idx1, idx2, idx3] <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>N</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="34">
+<div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>tensor([[[  0,   0,   0,  ...,   0,   0,   0],
          [  0,   0,   0,  ...,   0,   0,   0],
          [  0,   0,   0,  ...,   0,   0,   0],
@@ -772,7 +775,7 @@ nll/n_ele = tensor(4.1786)</code></pre>
 <section id="generating-characters-for-the-trigram-model" class="level2">
 <h2 class="anchored" data-anchor-id="generating-characters-for-the-trigram-model">Generating Characters for the Trigram Model</h2>
 <p>Now we can generate some characters using the same method from the bigram model. I’m curious what names we’ll get if we start with the first letter of my own name.</p>
-<div id="cell-45" class="cell" data-execution_count="38">
+<div id="cell-45" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> (N <span class="op">+</span> <span class="dv">1</span>).<span class="bu">float</span>()  <span class="co"># Model smoothing</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>P <span class="op">/=</span> P.<span class="bu">sum</span>(</span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span></span>
@@ -811,7 +814,7 @@ yund</code></pre>
 </div>
 </div>
 <p>And now when we evaluate the trigram model loss:</p>
-<div id="cell-47" class="cell" data-execution_count="40">
+<div id="cell-47" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>log_likelihood <span class="op">=</span> <span class="fl">0.0</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>n_ele <span class="op">=</span> <span class="fl">0.0</span></span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -826,7 +829,7 @@ yund</code></pre>
 <span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>nll <span class="op">=</span> <span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>nll<span class="op">/</span>n_ele <span class="op">=</span> <span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>nll = tensor(1523841.2500)
+<pre><code>nll = tensor(1523861.1250)
 nll/n_ele = tensor(1.8337)</code></pre>
 </div>
 </div>
@@ -836,10 +839,10 @@ nll/n_ele = tensor(1.8337)</code></pre>
 </section>
 <section id="neural-net---collectors-edition" class="level1">
 <h1>Neural Net - Collector’s Edition</h1>
-<p>We can recreate both the bigram and trigram models easily under this framework. The first step is to load the data. Instead of explicitly counting the frequency of each character / pair, we will store the an array of encoded inputs into <code>X</code> and target characters into <code>y</code>.</p>
+<p>We can recreate both the bigram and trigram models easily under this framework. The first step is to load the data. Instead of explicitly counting the frequency of each character / pair, we will store the encoded inputs into <code>X</code> and target characters into <code>y</code>.</p>
 <section id="bigram-model" class="level2">
 <h2 class="anchored" data-anchor-id="bigram-model">Bigram Model</h2>
-<div id="cell-51" class="cell" data-execution_count="45">
+<div id="cell-51" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> [], []</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> names:</span>
@@ -857,11 +860,11 @@ nll/n_ele = tensor(1.8337)</code></pre>
 <pre><code>Number of examples: 883744</code></pre>
 </div>
 </div>
-<div id="cell-52" class="cell" data-execution_count="46">
+<div id="cell-52" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>X, y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="46">
-<pre><code>(tensor([ 0, 13, 20,  ...,  2, 22, 10]),
- tensor([13, 20,  7,  ..., 22, 10,  0]))</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>(tensor([ 0, 20, 11,  ...,  3,  7, 20]),
+ tensor([20, 11, 28,  ...,  7, 20,  0]))</code></pre>
 </div>
 </div>
 <p>The second step is to feed our character indices into the model. However, we don’t want to directly feed in the integer values. For each index, we’d like to select the corresponding row in the weights matrix through matrix multiplication.</p>
@@ -883,7 +886,7 @@ nll/n_ele = tensor(1.8337)</code></pre>
 \right]
 \]</span></p>
 <p>When multiplied with our randomly initialized weight matrix <span class="math inline">\(W\)</span>, the one-hot encoded vectors will select the corresponding rows in <span class="math inline">\(W\)</span> similar to how we selected the rows from our probability matrix during character generation.</p>
-<div id="cell-54" class="cell" data-execution_count="47">
+<div id="cell-54" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> torch.Generator().manual_seed(<span class="dv">1234</span>)</span>
@@ -893,7 +896,7 @@ nll/n_ele = tensor(1.8337)</code></pre>
 <span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    (<span class="bu">len</span>(stoi), <span class="bu">len</span>(stoi)), dtype<span class="op">=</span>torch.float32, generator<span class="op">=</span>g</span>
 <span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>)  <span class="co"># Initialize our weight matrix with random Normal values, shape (29, 29)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-55" class="cell" data-execution_count="48">
+<div id="cell-55" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Demonstrating the row selection with one-hot vectors</span></span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>first_row <span class="op">=</span> F.one_hot(torch.tensor(<span class="dv">0</span>), num_classes<span class="op">=</span><span class="bu">len</span>(stoi)).<span class="bu">float</span>()</span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
@@ -903,17 +906,17 @@ nll/n_ele = tensor(1.8337)</code></pre>
 <pre><code>Test one-hot vector selects first row? True</code></pre>
 </div>
 </div>
-<div id="cell-56" class="cell" data-execution_count="49">
+<div id="cell-56" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>logits <span class="op">=</span> x_enc <span class="op">@</span> W  <span class="co"># Linear layer outputs log-counts / logits for all observations in X</span></span>
 <span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>logits</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="49">
+<div class="cell-output cell-output-display" data-execution_count="29">
 <pre><code>tensor([[-0.1117, -0.4966,  0.1631,  ...,  0.2207,  0.2463, -1.3248],
-        [-1.4317,  2.1155, -1.1853,  ...,  1.4487, -1.5155, -1.2364],
         [ 1.4007, -1.0216, -0.5113,  ...,  0.0163,  0.0612, -2.6981],
+        [-1.0545, -0.8748,  2.2994,  ...,  1.4802,  0.2942,  1.3924],
         ...,
-        [ 0.6808,  0.7244,  0.0323,  ...,  0.4308,  0.2862, -0.2481],
-        [ 1.2134,  0.8028, -0.4904,  ..., -0.2103, -0.9933, -0.2486],
-        [ 0.6091,  0.6668, -1.1206,  ..., -0.9728, -1.2452, -0.0115]])</code></pre>
+        [ 0.2040,  0.8519, -1.4102,  ..., -0.5510,  2.6617,  2.1479],
+        [-1.0208, -0.0175, -0.9194,  ..., -0.1704,  1.0270,  0.0704],
+        [ 1.4007, -1.0216, -0.5113,  ...,  0.0163,  0.0612, -2.6981]])</code></pre>
 </div>
 </div>
 <p>By multiplying our one-hot encoded inputs with our weights, we produce log-counts / logits. Logits are raw, unnormalized scores that the model outputs typically before applying some activation function.</p>
@@ -925,13 +928,13 @@ nll/n_ele = tensor(1.8337)</code></pre>
 \]</span></p>
 <p>The sum in the denominator mirrors what we did with the character counts previously (integers, greater than or equal to 0). There we just divided every count by the sum of the counts across the columns.</p>
 <p>If you think about it, softmax gives us a good representation of what we’re trying to do in multiclass classification where we’d like to utilize a probability space across all the classes after we train our model.</p>
-<div id="cell-58" class="cell" data-execution_count="50">
+<div id="cell-58" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> logits.exp()  <span class="co"># Exponentiate the logits</span></span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>probs <span class="op">=</span> counts <span class="op">/</span> counts.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> torch.allclose(torch.ones(probs.shape[<span class="dv">0</span>], dtype<span class="op">=</span>torch.float32), probs.<span class="bu">sum</span>(dim<span class="op">=</span><span class="dv">1</span>))</span>
 <span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>logits[<span class="dv">0</span>], probs[<span class="dv">0</span>]  <span class="co"># Just to compare some values</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="50">
+<div class="cell-output cell-output-display" data-execution_count="30">
 <pre><code>(tensor([-0.1117, -0.4966,  0.1631, -0.8817,  0.0539,  0.6684, -0.0597, -0.4675,
          -0.2153,  0.8840, -0.7584, -0.3689, -0.3424, -1.4020,  0.3206, -1.0219,
           0.7988, -0.0923, -0.7049, -1.6024,  0.2891,  0.4899, -0.3853, -0.7120,
@@ -956,7 +959,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>We won’t be going over backprop here, but you can read all about it in this Stanford CS231n resource. Also, you can look at a simple vectorized feedforward net I implemented through GitHub.</p>
+<p>We won’t be going over backprop here, but you can read all about it in this <a href="https://cs231n.github.io/optimization-2/">Stanford CS231n resource</a>. Also, you can look at a simple vectorized feedforward net I implemented through <a href="https://github.com/yangrchen/vectorized_mlp">GitHub</a>.</p>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip callout-titled" title="Ensuring Autodiff">
@@ -974,7 +977,7 @@ Ensuring Autodiff
 </div>
 <section id="training-loop" class="level3">
 <h3 class="anchored" data-anchor-id="training-loop">Training Loop</h3>
-<div id="cell-62" class="cell" data-execution_count="51">
+<div id="cell-62" class="cell" data-execution_count="31">
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> torch.Generator().manual_seed(<span class="dv">1234</span>)</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> torch.randn((<span class="bu">len</span>(stoi), <span class="bu">len</span>(stoi)), generator<span class="op">=</span>g, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -988,216 +991,39 @@ Ensuring Autodiff
 <span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate negative log-likelihood</span></span>
 <span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> <span class="op">-</span>probs[torch.arange(num_X), y].log().mean()</span>
-<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">, Loss: </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
-<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Backward pass</span></span>
-<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>    W.grad <span class="op">=</span> <span class="va">None</span>  <span class="co"># Zero out the gradient before backprop</span></span>
-<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>    loss.backward()  <span class="co"># Backprop</span></span>
-<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update step</span></span>
-<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>    lr <span class="op">=</span> <span class="dv">50</span>  <span class="co"># Can use a very high learning rate on our simple data</span></span>
-<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a>    W.data <span class="op">+=</span> <span class="op">-</span>lr <span class="op">*</span> W.grad</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Log metrics every 10 epochs</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">%</span> <span class="dv">10</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">, Loss: </span><span class="sc">{</span>loss<span class="sc">.</span>item()<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Backward pass</span></span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a>    W.grad <span class="op">=</span> <span class="va">None</span>  <span class="co"># Zero out the gradient before backprop</span></span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>    loss.backward()  <span class="co"># Backprop</span></span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update step</span></span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a>    lr <span class="op">=</span> <span class="dv">50</span>  <span class="co"># Can use a very high learning rate on our simple data</span></span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a>    W.data <span class="op">+=</span> <span class="op">-</span>lr <span class="op">*</span> W.grad</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Epoch 0, Loss: 3.8228
-Epoch 1, Loss: 3.5151
-Epoch 2, Loss: 3.3178
-Epoch 3, Loss: 3.1808
-Epoch 4, Loss: 3.0822
-Epoch 5, Loss: 3.0082
-Epoch 6, Loss: 2.9509
-Epoch 7, Loss: 2.9054
-Epoch 8, Loss: 2.8684
-Epoch 9, Loss: 2.8378
 Epoch 10, Loss: 2.8120
-Epoch 11, Loss: 2.7899
-Epoch 12, Loss: 2.7708
-Epoch 13, Loss: 2.7541
-Epoch 14, Loss: 2.7395
-Epoch 15, Loss: 2.7265
-Epoch 16, Loss: 2.7149
-Epoch 17, Loss: 2.7045
-Epoch 18, Loss: 2.6951
-Epoch 19, Loss: 2.6867
 Epoch 20, Loss: 2.6790
-Epoch 21, Loss: 2.6719
-Epoch 22, Loss: 2.6655
-Epoch 23, Loss: 2.6596
-Epoch 24, Loss: 2.6542
-Epoch 25, Loss: 2.6491
-Epoch 26, Loss: 2.6445
-Epoch 27, Loss: 2.6402
-Epoch 28, Loss: 2.6362
-Epoch 29, Loss: 2.6324
 Epoch 30, Loss: 2.6290
-Epoch 31, Loss: 2.6257
-Epoch 32, Loss: 2.6226
-Epoch 33, Loss: 2.6198
-Epoch 34, Loss: 2.6171
-Epoch 35, Loss: 2.6145
-Epoch 36, Loss: 2.6121
-Epoch 37, Loss: 2.6098
-Epoch 38, Loss: 2.6077
-Epoch 39, Loss: 2.6056
 Epoch 40, Loss: 2.6037
-Epoch 41, Loss: 2.6019
-Epoch 42, Loss: 2.6001
-Epoch 43, Loss: 2.5984
-Epoch 44, Loss: 2.5968
-Epoch 45, Loss: 2.5953
-Epoch 46, Loss: 2.5938
-Epoch 47, Loss: 2.5924
-Epoch 48, Loss: 2.5910
-Epoch 49, Loss: 2.5897
 Epoch 50, Loss: 2.5885
-Epoch 51, Loss: 2.5873
-Epoch 52, Loss: 2.5861
-Epoch 53, Loss: 2.5850
-Epoch 54, Loss: 2.5839
-Epoch 55, Loss: 2.5829
-Epoch 56, Loss: 2.5819
-Epoch 57, Loss: 2.5809
-Epoch 58, Loss: 2.5800
-Epoch 59, Loss: 2.5791
 Epoch 60, Loss: 2.5782
-Epoch 61, Loss: 2.5773
-Epoch 62, Loss: 2.5765
-Epoch 63, Loss: 2.5757
-Epoch 64, Loss: 2.5750
-Epoch 65, Loss: 2.5742
-Epoch 66, Loss: 2.5735
-Epoch 67, Loss: 2.5728
-Epoch 68, Loss: 2.5721
-Epoch 69, Loss: 2.5714
 Epoch 70, Loss: 2.5708
-Epoch 71, Loss: 2.5701
-Epoch 72, Loss: 2.5695
-Epoch 73, Loss: 2.5689
-Epoch 74, Loss: 2.5684
-Epoch 75, Loss: 2.5678
-Epoch 76, Loss: 2.5672
-Epoch 77, Loss: 2.5667
-Epoch 78, Loss: 2.5662
-Epoch 79, Loss: 2.5657
 Epoch 80, Loss: 2.5652
-Epoch 81, Loss: 2.5647
-Epoch 82, Loss: 2.5642
-Epoch 83, Loss: 2.5638
-Epoch 84, Loss: 2.5633
-Epoch 85, Loss: 2.5629
-Epoch 86, Loss: 2.5624
-Epoch 87, Loss: 2.5620
-Epoch 88, Loss: 2.5616
-Epoch 89, Loss: 2.5612
 Epoch 90, Loss: 2.5608
-Epoch 91, Loss: 2.5604
-Epoch 92, Loss: 2.5601
-Epoch 93, Loss: 2.5597
-Epoch 94, Loss: 2.5594
-Epoch 95, Loss: 2.5590
-Epoch 96, Loss: 2.5587
-Epoch 97, Loss: 2.5583
-Epoch 98, Loss: 2.5580
-Epoch 99, Loss: 2.5577
 Epoch 100, Loss: 2.5574
-Epoch 101, Loss: 2.5571
-Epoch 102, Loss: 2.5568
-Epoch 103, Loss: 2.5565
-Epoch 104, Loss: 2.5562
-Epoch 105, Loss: 2.5559
-Epoch 106, Loss: 2.5556
-Epoch 107, Loss: 2.5553
-Epoch 108, Loss: 2.5551
-Epoch 109, Loss: 2.5548
 Epoch 110, Loss: 2.5546
-Epoch 111, Loss: 2.5543
-Epoch 112, Loss: 2.5541
-Epoch 113, Loss: 2.5538
-Epoch 114, Loss: 2.5536
-Epoch 115, Loss: 2.5534
-Epoch 116, Loss: 2.5531
-Epoch 117, Loss: 2.5529
-Epoch 118, Loss: 2.5527
-Epoch 119, Loss: 2.5525
 Epoch 120, Loss: 2.5523
-Epoch 121, Loss: 2.5520
-Epoch 122, Loss: 2.5518
-Epoch 123, Loss: 2.5516
-Epoch 124, Loss: 2.5514
-Epoch 125, Loss: 2.5512
-Epoch 126, Loss: 2.5511
-Epoch 127, Loss: 2.5509
-Epoch 128, Loss: 2.5507
-Epoch 129, Loss: 2.5505
 Epoch 130, Loss: 2.5503
-Epoch 131, Loss: 2.5501
-Epoch 132, Loss: 2.5500
-Epoch 133, Loss: 2.5498
-Epoch 134, Loss: 2.5496
-Epoch 135, Loss: 2.5495
-Epoch 136, Loss: 2.5493
-Epoch 137, Loss: 2.5492
-Epoch 138, Loss: 2.5490
-Epoch 139, Loss: 2.5488
 Epoch 140, Loss: 2.5487
-Epoch 141, Loss: 2.5485
-Epoch 142, Loss: 2.5484
-Epoch 143, Loss: 2.5482
-Epoch 144, Loss: 2.5481
-Epoch 145, Loss: 2.5480
-Epoch 146, Loss: 2.5478
-Epoch 147, Loss: 2.5477
-Epoch 148, Loss: 2.5476
-Epoch 149, Loss: 2.5474
 Epoch 150, Loss: 2.5473
-Epoch 151, Loss: 2.5472
-Epoch 152, Loss: 2.5470
-Epoch 153, Loss: 2.5469
-Epoch 154, Loss: 2.5468
-Epoch 155, Loss: 2.5467
-Epoch 156, Loss: 2.5465
-Epoch 157, Loss: 2.5464
-Epoch 158, Loss: 2.5463
-Epoch 159, Loss: 2.5462
 Epoch 160, Loss: 2.5461
-Epoch 161, Loss: 2.5460
-Epoch 162, Loss: 2.5459
-Epoch 163, Loss: 2.5457
-Epoch 164, Loss: 2.5456
-Epoch 165, Loss: 2.5455
-Epoch 166, Loss: 2.5454
-Epoch 167, Loss: 2.5453
-Epoch 168, Loss: 2.5452
-Epoch 169, Loss: 2.5451
 Epoch 170, Loss: 2.5450
-Epoch 171, Loss: 2.5449
-Epoch 172, Loss: 2.5448
-Epoch 173, Loss: 2.5447
-Epoch 174, Loss: 2.5446
-Epoch 175, Loss: 2.5445
-Epoch 176, Loss: 2.5445
-Epoch 177, Loss: 2.5444
-Epoch 178, Loss: 2.5443
-Epoch 179, Loss: 2.5442
 Epoch 180, Loss: 2.5441
-Epoch 181, Loss: 2.5440
-Epoch 182, Loss: 2.5439
-Epoch 183, Loss: 2.5438
-Epoch 184, Loss: 2.5438
-Epoch 185, Loss: 2.5437
-Epoch 186, Loss: 2.5436
-Epoch 187, Loss: 2.5435
-Epoch 188, Loss: 2.5434
-Epoch 189, Loss: 2.5433
-Epoch 190, Loss: 2.5433
-Epoch 191, Loss: 2.5432
-Epoch 192, Loss: 2.5431
-Epoch 193, Loss: 2.5430
-Epoch 194, Loss: 2.5430
-Epoch 195, Loss: 2.5429
-Epoch 196, Loss: 2.5428
-Epoch 197, Loss: 2.5427
-Epoch 198, Loss: 2.5427
-Epoch 199, Loss: 2.5426</code></pre>
+Epoch 190, Loss: 2.5433</code></pre>
 </div>
 </div>
 <p>The expected loss should converge to around the same point that our counting model did. Why would we want to use the neural net framework?</p>
@@ -1212,7 +1038,7 @@ Epoch 199, Loss: 2.5426</code></pre>
 <section id="trigram-neural-net-optimizing-code" class="level1">
 <h1>Trigram Neural Net, Optimizing Code</h1>
 <p>We’ll implement the trigram neural net in a similar way to how we made the bigram net. Our input <code>X</code> will now be 2D and take in arrays of encoded indices.</p>
-<div id="cell-66" class="cell" data-execution_count="62">
+<div id="cell-66" class="cell" data-execution_count="32">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>X_tri, y_tri <span class="op">=</span> [], []</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> names:</span>
@@ -1233,10 +1059,10 @@ Epoch 199, Loss: 2.5426</code></pre>
 <section id="one-hot-encoding-seems-wasteful" class="level2">
 <h2 class="anchored" data-anchor-id="one-hot-encoding-seems-wasteful">One-Hot Encoding Seems Wasteful…</h2>
 <p>In the bigram neural net, all our one-hot encoding matrix is doing is indexing the <span class="math inline">\(i^{th}\)</span> row of the weight matrix when we multiply them together. We can eliminate the matrix multiplication entirely and use the indices themselves.</p>
-<div id="cell-69" class="cell" data-execution_count="500">
+<div id="cell-69" class="cell" data-execution_count="33">
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> torch.<span class="bu">all</span>((x_enc <span class="op">@</span> W)[<span class="dv">0</span>] <span class="op">==</span> W[<span class="dv">0</span>]).item()</span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>(x_enc <span class="op">@</span> W)[<span class="dv">0</span>], W[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="500">
+<div class="cell-output cell-output-display" data-execution_count="33">
 <pre><code>(tensor([-3.0790, -3.1019, -3.0673, -0.0794,  0.6222,  0.0568,  0.7115, -0.1114,
          -1.2216, -0.0568, -0.0403,  0.5561,  0.2973,  0.6091, -0.0517,  0.3182,
           0.7183, -0.3287, -0.7147, -0.2213,  0.8389,  0.8457,  0.8208, -0.7500,
@@ -1250,33 +1076,33 @@ Epoch 199, Loss: 2.5426</code></pre>
 </div>
 </div>
 <p>For the trigram model, our one-hot encoding would have looked a little different. We would have had two <span class="math inline">\(1 \times 29\)</span> arrays after one-hot encoding a single observation. To represent the bigram properly, we could flatten the input by reshaping it to be <span class="math inline">\(1 \times (29 \times 2)\)</span>.</p>
-<div id="cell-71" class="cell">
+<div id="cell-71" class="cell" data-execution_count="34">
 <div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>x_enc <span class="op">=</span> F.one_hot(X_tri, num_classes<span class="op">=</span><span class="bu">len</span>(stoi))</span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>x_enc.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="bu">len</span>(stoi) <span class="op">*</span> <span class="dv">2</span>)[</span>
 <span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span></span>
 <span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>]  <span class="co"># Example of the first one-hot encoded input for trigram</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
+<div class="cell-output cell-output-display" data-execution_count="34">
 <pre><code>tensor([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0])</code></pre>
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 1, 0, 0, 0, 0, 0, 0, 0, 0])</code></pre>
 </div>
 </div>
 <p>However, to directly index into the weight matrix we’ll instead add the corresponding weights of the two input one-hot vectors.</p>
-<div id="cell-73" class="cell" data-execution_count="68">
+<div id="cell-73" class="cell" data-execution_count="35">
 <div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> torch.Generator().manual_seed(<span class="dv">1234</span>)</span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>W_tri <span class="op">=</span> torch.randn(<span class="bu">len</span>(stoi) <span class="op">*</span> <span class="dv">2</span>, <span class="bu">len</span>(stoi), generator<span class="op">=</span>g, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>    W_tri[X_tri[:, <span class="dv">0</span>]] <span class="op">+</span> W_tri[X_tri[:, <span class="dv">1</span>] <span class="op">+</span> <span class="bu">len</span>(stoi)]</span>
 <span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>)  <span class="co"># If we were to work out the math this should be the same as the one-hot matrix multiplication</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="68">
-<pre><code>tensor([[-1.3989,  0.3646, -0.5769,  ...,  1.1644,  0.2497, -1.0169],
-        [-2.4248,  2.7207, -0.9457,  ...,  1.2563, -1.0174, -2.0139],
-        [ 1.2271, -1.3894, -0.8112,  ..., -0.5733,  0.3006, -5.3611],
+<div class="cell-output cell-output-display" data-execution_count="35">
+<pre><code>tensor([[-1.1048,  0.1086,  0.4027,  ...,  0.0283,  0.7444, -2.1023],
+        [ 3.7578, -2.5055,  0.0182,  ..., -0.1896,  1.2040, -1.0617],
+        [-1.3282, -0.5945,  2.5014,  ...,  0.7305,  0.6521,  0.5931],
         ...,
-        [-0.4182, -0.4081, -0.4229,  ...,  3.3730,  0.9064,  0.9942],
-        [ 1.4163,  2.6578,  2.3376,  ...,  1.6067,  0.1897,  0.2689],
-        [ 1.2769,  0.4757, -1.4108,  ...,  0.9325, -1.8790,  0.2165]],
+        [ 0.8205,  0.9721, -0.9617,  ..., -1.4475, -1.8288, -0.2526],
+        [ 0.0304,  0.4840, -1.7101,  ..., -1.1405,  2.9011, -0.5150],
+        [-2.0139,  0.5877, -0.6798,  ..., -0.3628,  1.5252, -0.7071]],
        grad_fn=&lt;AddBackward0&gt;)</code></pre>
 </div>
 </div>
@@ -1295,7 +1121,7 @@ Epoch 199, Loss: 2.5426</code></pre>
 </section>
 <section id="trigram-model-1" class="level2">
 <h2 class="anchored" data-anchor-id="trigram-model-1">Trigram Model</h2>
-<div id="cell-76" class="cell" data-execution_count="94">
+<div id="cell-76" class="cell" data-execution_count="36">
 <div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> torch.Generator().manual_seed(<span class="dv">1234</span>)</span>
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>W_tri <span class="op">=</span> torch.randn(<span class="bu">len</span>(stoi) <span class="op">*</span> <span class="dv">2</span>, <span class="bu">len</span>(stoi), generator<span class="op">=</span>g, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1355,7 +1181,7 @@ Epoch 190, Loss: 2.3001</code></pre>
 <section id="generating-characters-from-neural-net" class="level2">
 <h2 class="anchored" data-anchor-id="generating-characters-from-neural-net">Generating Characters from Neural Net</h2>
 <p>Finally, let’s see how we can generate characters from the neural net. A new band of adventurers await…</p>
-<div id="cell-78" class="cell" data-execution_count="95">
+<div id="cell-78" class="cell" data-execution_count="39">
 <div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> torch.Generator().manual_seed(<span class="dv">1234</span>)</span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10</span>):</span>
@@ -1392,7 +1218,7 @@ ymden kryl</code></pre>
 <section id="appendix" class="level1">
 <h1>Appendix</h1>
 <p>If you want to try the 2D tensor version of the trigram model, you can setup the data with a new encoder that maps all the possible character duos to integers.</p>
-<div id="cell-82" class="cell" data-execution_count="58">
+<div id="cell-82" class="cell" data-execution_count="41">
 <div class="sourceCode cell-code" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> product</span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> string</span>
 <span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1401,849 +1227,18 @@ ymden kryl</code></pre>
 <span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>stoi_duos <span class="op">=</span> {bi: i <span class="cf">for</span> i, bi <span class="kw">in</span> <span class="bu">enumerate</span>(duos)}</span>
 <span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>itos_duos <span class="op">=</span> {i: bi <span class="cf">for</span> bi, i <span class="kw">in</span> stoi_duos.items()}</span>
 <span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>stoi_duos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="58">
-<pre><code>{'  ': 0,
- " '": 1,
- ' .': 2,
- ' a': 3,
- ' b': 4,
- ' c': 5,
- ' d': 6,
- ' e': 7,
- ' f': 8,
- ' g': 9,
- ' h': 10,
- ' i': 11,
- ' j': 12,
- ' k': 13,
- ' l': 14,
- ' m': 15,
- ' n': 16,
- ' o': 17,
- ' p': 18,
- ' q': 19,
- ' r': 20,
- ' s': 21,
- ' t': 22,
- ' u': 23,
- ' v': 24,
- ' w': 25,
- ' x': 26,
- ' y': 27,
- ' z': 28,
- "' ": 29,
- "''": 30,
- "'.": 31,
- "'a": 32,
- "'b": 33,
- "'c": 34,
- "'d": 35,
- "'e": 36,
- "'f": 37,
- "'g": 38,
- "'h": 39,
- "'i": 40,
- "'j": 41,
- "'k": 42,
- "'l": 43,
- "'m": 44,
- "'n": 45,
- "'o": 46,
- "'p": 47,
- "'q": 48,
- "'r": 49,
- "'s": 50,
- "'t": 51,
- "'u": 52,
- "'v": 53,
- "'w": 54,
- "'x": 55,
- "'y": 56,
- "'z": 57,
- '. ': 58,
- ".'": 59,
- '..': 60,
- '.a': 61,
- '.b': 62,
- '.c': 63,
- '.d': 64,
- '.e': 65,
- '.f': 66,
- '.g': 67,
- '.h': 68,
- '.i': 69,
- '.j': 70,
- '.k': 71,
- '.l': 72,
- '.m': 73,
- '.n': 74,
- '.o': 75,
- '.p': 76,
- '.q': 77,
- '.r': 78,
- '.s': 79,
- '.t': 80,
- '.u': 81,
- '.v': 82,
- '.w': 83,
- '.x': 84,
- '.y': 85,
- '.z': 86,
- 'a ': 87,
- "a'": 88,
- 'a.': 89,
- 'aa': 90,
- 'ab': 91,
- 'ac': 92,
- 'ad': 93,
- 'ae': 94,
- 'af': 95,
- 'ag': 96,
- 'ah': 97,
- 'ai': 98,
- 'aj': 99,
- 'ak': 100,
- 'al': 101,
- 'am': 102,
- 'an': 103,
- 'ao': 104,
- 'ap': 105,
- 'aq': 106,
- 'ar': 107,
- 'as': 108,
- 'at': 109,
- 'au': 110,
- 'av': 111,
- 'aw': 112,
- 'ax': 113,
- 'ay': 114,
- 'az': 115,
- 'b ': 116,
- "b'": 117,
- 'b.': 118,
- 'ba': 119,
- 'bb': 120,
- 'bc': 121,
- 'bd': 122,
- 'be': 123,
- 'bf': 124,
- 'bg': 125,
- 'bh': 126,
- 'bi': 127,
- 'bj': 128,
- 'bk': 129,
- 'bl': 130,
- 'bm': 131,
- 'bn': 132,
- 'bo': 133,
- 'bp': 134,
- 'bq': 135,
- 'br': 136,
- 'bs': 137,
- 'bt': 138,
- 'bu': 139,
- 'bv': 140,
- 'bw': 141,
- 'bx': 142,
- 'by': 143,
- 'bz': 144,
- 'c ': 145,
- "c'": 146,
- 'c.': 147,
- 'ca': 148,
- 'cb': 149,
- 'cc': 150,
- 'cd': 151,
- 'ce': 152,
- 'cf': 153,
- 'cg': 154,
- 'ch': 155,
- 'ci': 156,
- 'cj': 157,
- 'ck': 158,
- 'cl': 159,
- 'cm': 160,
- 'cn': 161,
- 'co': 162,
- 'cp': 163,
- 'cq': 164,
- 'cr': 165,
- 'cs': 166,
- 'ct': 167,
- 'cu': 168,
- 'cv': 169,
- 'cw': 170,
- 'cx': 171,
- 'cy': 172,
- 'cz': 173,
- 'd ': 174,
- "d'": 175,
- 'd.': 176,
- 'da': 177,
- 'db': 178,
- 'dc': 179,
- 'dd': 180,
- 'de': 181,
- 'df': 182,
- 'dg': 183,
- 'dh': 184,
- 'di': 185,
- 'dj': 186,
- 'dk': 187,
- 'dl': 188,
- 'dm': 189,
- 'dn': 190,
- 'do': 191,
- 'dp': 192,
- 'dq': 193,
- 'dr': 194,
- 'ds': 195,
- 'dt': 196,
- 'du': 197,
- 'dv': 198,
- 'dw': 199,
- 'dx': 200,
- 'dy': 201,
- 'dz': 202,
- 'e ': 203,
- "e'": 204,
- 'e.': 205,
- 'ea': 206,
- 'eb': 207,
- 'ec': 208,
- 'ed': 209,
- 'ee': 210,
- 'ef': 211,
- 'eg': 212,
- 'eh': 213,
- 'ei': 214,
- 'ej': 215,
- 'ek': 216,
- 'el': 217,
- 'em': 218,
- 'en': 219,
- 'eo': 220,
- 'ep': 221,
- 'eq': 222,
- 'er': 223,
- 'es': 224,
- 'et': 225,
- 'eu': 226,
- 'ev': 227,
- 'ew': 228,
- 'ex': 229,
- 'ey': 230,
- 'ez': 231,
- 'f ': 232,
- "f'": 233,
- 'f.': 234,
- 'fa': 235,
- 'fb': 236,
- 'fc': 237,
- 'fd': 238,
- 'fe': 239,
- 'ff': 240,
- 'fg': 241,
- 'fh': 242,
- 'fi': 243,
- 'fj': 244,
- 'fk': 245,
- 'fl': 246,
- 'fm': 247,
- 'fn': 248,
- 'fo': 249,
- 'fp': 250,
- 'fq': 251,
- 'fr': 252,
- 'fs': 253,
- 'ft': 254,
- 'fu': 255,
- 'fv': 256,
- 'fw': 257,
- 'fx': 258,
- 'fy': 259,
- 'fz': 260,
- 'g ': 261,
- "g'": 262,
- 'g.': 263,
- 'ga': 264,
- 'gb': 265,
- 'gc': 266,
- 'gd': 267,
- 'ge': 268,
- 'gf': 269,
- 'gg': 270,
- 'gh': 271,
- 'gi': 272,
- 'gj': 273,
- 'gk': 274,
- 'gl': 275,
- 'gm': 276,
- 'gn': 277,
- 'go': 278,
- 'gp': 279,
- 'gq': 280,
- 'gr': 281,
- 'gs': 282,
- 'gt': 283,
- 'gu': 284,
- 'gv': 285,
- 'gw': 286,
- 'gx': 287,
- 'gy': 288,
- 'gz': 289,
- 'h ': 290,
- "h'": 291,
- 'h.': 292,
- 'ha': 293,
- 'hb': 294,
- 'hc': 295,
- 'hd': 296,
- 'he': 297,
- 'hf': 298,
- 'hg': 299,
- 'hh': 300,
- 'hi': 301,
- 'hj': 302,
- 'hk': 303,
- 'hl': 304,
- 'hm': 305,
- 'hn': 306,
- 'ho': 307,
- 'hp': 308,
- 'hq': 309,
- 'hr': 310,
- 'hs': 311,
- 'ht': 312,
- 'hu': 313,
- 'hv': 314,
- 'hw': 315,
- 'hx': 316,
- 'hy': 317,
- 'hz': 318,
- 'i ': 319,
- "i'": 320,
- 'i.': 321,
- 'ia': 322,
- 'ib': 323,
- 'ic': 324,
- 'id': 325,
- 'ie': 326,
- 'if': 327,
- 'ig': 328,
- 'ih': 329,
- 'ii': 330,
- 'ij': 331,
- 'ik': 332,
- 'il': 333,
- 'im': 334,
- 'in': 335,
- 'io': 336,
- 'ip': 337,
- 'iq': 338,
- 'ir': 339,
- 'is': 340,
- 'it': 341,
- 'iu': 342,
- 'iv': 343,
- 'iw': 344,
- 'ix': 345,
- 'iy': 346,
- 'iz': 347,
- 'j ': 348,
- "j'": 349,
- 'j.': 350,
- 'ja': 351,
- 'jb': 352,
- 'jc': 353,
- 'jd': 354,
- 'je': 355,
- 'jf': 356,
- 'jg': 357,
- 'jh': 358,
- 'ji': 359,
- 'jj': 360,
- 'jk': 361,
- 'jl': 362,
- 'jm': 363,
- 'jn': 364,
- 'jo': 365,
- 'jp': 366,
- 'jq': 367,
- 'jr': 368,
- 'js': 369,
- 'jt': 370,
- 'ju': 371,
- 'jv': 372,
- 'jw': 373,
- 'jx': 374,
- 'jy': 375,
- 'jz': 376,
- 'k ': 377,
- "k'": 378,
- 'k.': 379,
- 'ka': 380,
- 'kb': 381,
- 'kc': 382,
- 'kd': 383,
- 'ke': 384,
- 'kf': 385,
- 'kg': 386,
- 'kh': 387,
- 'ki': 388,
- 'kj': 389,
- 'kk': 390,
- 'kl': 391,
- 'km': 392,
- 'kn': 393,
- 'ko': 394,
- 'kp': 395,
- 'kq': 396,
- 'kr': 397,
- 'ks': 398,
- 'kt': 399,
- 'ku': 400,
- 'kv': 401,
- 'kw': 402,
- 'kx': 403,
- 'ky': 404,
- 'kz': 405,
- 'l ': 406,
- "l'": 407,
- 'l.': 408,
- 'la': 409,
- 'lb': 410,
- 'lc': 411,
- 'ld': 412,
- 'le': 413,
- 'lf': 414,
- 'lg': 415,
- 'lh': 416,
- 'li': 417,
- 'lj': 418,
- 'lk': 419,
- 'll': 420,
- 'lm': 421,
- 'ln': 422,
- 'lo': 423,
- 'lp': 424,
- 'lq': 425,
- 'lr': 426,
- 'ls': 427,
- 'lt': 428,
- 'lu': 429,
- 'lv': 430,
- 'lw': 431,
- 'lx': 432,
- 'ly': 433,
- 'lz': 434,
- 'm ': 435,
- "m'": 436,
- 'm.': 437,
- 'ma': 438,
- 'mb': 439,
- 'mc': 440,
- 'md': 441,
- 'me': 442,
- 'mf': 443,
- 'mg': 444,
- 'mh': 445,
- 'mi': 446,
- 'mj': 447,
- 'mk': 448,
- 'ml': 449,
- 'mm': 450,
- 'mn': 451,
- 'mo': 452,
- 'mp': 453,
- 'mq': 454,
- 'mr': 455,
- 'ms': 456,
- 'mt': 457,
- 'mu': 458,
- 'mv': 459,
- 'mw': 460,
- 'mx': 461,
- 'my': 462,
- 'mz': 463,
- 'n ': 464,
- "n'": 465,
- 'n.': 466,
- 'na': 467,
- 'nb': 468,
- 'nc': 469,
- 'nd': 470,
- 'ne': 471,
- 'nf': 472,
- 'ng': 473,
- 'nh': 474,
- 'ni': 475,
- 'nj': 476,
- 'nk': 477,
- 'nl': 478,
- 'nm': 479,
- 'nn': 480,
- 'no': 481,
- 'np': 482,
- 'nq': 483,
- 'nr': 484,
- 'ns': 485,
- 'nt': 486,
- 'nu': 487,
- 'nv': 488,
- 'nw': 489,
- 'nx': 490,
- 'ny': 491,
- 'nz': 492,
- 'o ': 493,
- "o'": 494,
- 'o.': 495,
- 'oa': 496,
- 'ob': 497,
- 'oc': 498,
- 'od': 499,
- 'oe': 500,
- 'of': 501,
- 'og': 502,
- 'oh': 503,
- 'oi': 504,
- 'oj': 505,
- 'ok': 506,
- 'ol': 507,
- 'om': 508,
- 'on': 509,
- 'oo': 510,
- 'op': 511,
- 'oq': 512,
- 'or': 513,
- 'os': 514,
- 'ot': 515,
- 'ou': 516,
- 'ov': 517,
- 'ow': 518,
- 'ox': 519,
- 'oy': 520,
- 'oz': 521,
- 'p ': 522,
- "p'": 523,
- 'p.': 524,
- 'pa': 525,
- 'pb': 526,
- 'pc': 527,
- 'pd': 528,
- 'pe': 529,
- 'pf': 530,
- 'pg': 531,
- 'ph': 532,
- 'pi': 533,
- 'pj': 534,
- 'pk': 535,
- 'pl': 536,
- 'pm': 537,
- 'pn': 538,
- 'po': 539,
- 'pp': 540,
- 'pq': 541,
- 'pr': 542,
- 'ps': 543,
- 'pt': 544,
- 'pu': 545,
- 'pv': 546,
- 'pw': 547,
- 'px': 548,
- 'py': 549,
- 'pz': 550,
- 'q ': 551,
- "q'": 552,
- 'q.': 553,
- 'qa': 554,
- 'qb': 555,
- 'qc': 556,
- 'qd': 557,
- 'qe': 558,
- 'qf': 559,
- 'qg': 560,
- 'qh': 561,
- 'qi': 562,
- 'qj': 563,
- 'qk': 564,
- 'ql': 565,
- 'qm': 566,
- 'qn': 567,
- 'qo': 568,
- 'qp': 569,
- 'qq': 570,
- 'qr': 571,
- 'qs': 572,
- 'qt': 573,
- 'qu': 574,
- 'qv': 575,
- 'qw': 576,
- 'qx': 577,
- 'qy': 578,
- 'qz': 579,
- 'r ': 580,
- "r'": 581,
- 'r.': 582,
- 'ra': 583,
- 'rb': 584,
- 'rc': 585,
- 'rd': 586,
- 're': 587,
- 'rf': 588,
- 'rg': 589,
- 'rh': 590,
- 'ri': 591,
- 'rj': 592,
- 'rk': 593,
- 'rl': 594,
- 'rm': 595,
- 'rn': 596,
- 'ro': 597,
- 'rp': 598,
- 'rq': 599,
- 'rr': 600,
- 'rs': 601,
- 'rt': 602,
- 'ru': 603,
- 'rv': 604,
- 'rw': 605,
- 'rx': 606,
- 'ry': 607,
- 'rz': 608,
- 's ': 609,
- "s'": 610,
- 's.': 611,
- 'sa': 612,
- 'sb': 613,
- 'sc': 614,
- 'sd': 615,
- 'se': 616,
- 'sf': 617,
- 'sg': 618,
- 'sh': 619,
- 'si': 620,
- 'sj': 621,
- 'sk': 622,
- 'sl': 623,
- 'sm': 624,
- 'sn': 625,
- 'so': 626,
- 'sp': 627,
- 'sq': 628,
- 'sr': 629,
- 'ss': 630,
- 'st': 631,
- 'su': 632,
- 'sv': 633,
- 'sw': 634,
- 'sx': 635,
- 'sy': 636,
- 'sz': 637,
- 't ': 638,
- "t'": 639,
- 't.': 640,
- 'ta': 641,
- 'tb': 642,
- 'tc': 643,
- 'td': 644,
- 'te': 645,
- 'tf': 646,
- 'tg': 647,
- 'th': 648,
- 'ti': 649,
- 'tj': 650,
- 'tk': 651,
- 'tl': 652,
- 'tm': 653,
- 'tn': 654,
- 'to': 655,
- 'tp': 656,
- 'tq': 657,
- 'tr': 658,
- 'ts': 659,
- 'tt': 660,
- 'tu': 661,
- 'tv': 662,
- 'tw': 663,
- 'tx': 664,
- 'ty': 665,
- 'tz': 666,
- 'u ': 667,
- "u'": 668,
- 'u.': 669,
- 'ua': 670,
- 'ub': 671,
- 'uc': 672,
- 'ud': 673,
- 'ue': 674,
- 'uf': 675,
- 'ug': 676,
- 'uh': 677,
- 'ui': 678,
- 'uj': 679,
- 'uk': 680,
- 'ul': 681,
- 'um': 682,
- 'un': 683,
- 'uo': 684,
- 'up': 685,
- 'uq': 686,
- 'ur': 687,
- 'us': 688,
- 'ut': 689,
- 'uu': 690,
- 'uv': 691,
- 'uw': 692,
- 'ux': 693,
- 'uy': 694,
- 'uz': 695,
- 'v ': 696,
- "v'": 697,
- 'v.': 698,
- 'va': 699,
- 'vb': 700,
- 'vc': 701,
- 'vd': 702,
- 've': 703,
- 'vf': 704,
- 'vg': 705,
- 'vh': 706,
- 'vi': 707,
- 'vj': 708,
- 'vk': 709,
- 'vl': 710,
- 'vm': 711,
- 'vn': 712,
- 'vo': 713,
- 'vp': 714,
- 'vq': 715,
- 'vr': 716,
- 'vs': 717,
- 'vt': 718,
- 'vu': 719,
- 'vv': 720,
- 'vw': 721,
- 'vx': 722,
- 'vy': 723,
- 'vz': 724,
- 'w ': 725,
- "w'": 726,
- 'w.': 727,
- 'wa': 728,
- 'wb': 729,
- 'wc': 730,
- 'wd': 731,
- 'we': 732,
- 'wf': 733,
- 'wg': 734,
- 'wh': 735,
- 'wi': 736,
- 'wj': 737,
- 'wk': 738,
- 'wl': 739,
- 'wm': 740,
- 'wn': 741,
- 'wo': 742,
- 'wp': 743,
- 'wq': 744,
- 'wr': 745,
- 'ws': 746,
- 'wt': 747,
- 'wu': 748,
- 'wv': 749,
- 'ww': 750,
- 'wx': 751,
- 'wy': 752,
- 'wz': 753,
- 'x ': 754,
- "x'": 755,
- 'x.': 756,
- 'xa': 757,
- 'xb': 758,
- 'xc': 759,
- 'xd': 760,
- 'xe': 761,
- 'xf': 762,
- 'xg': 763,
- 'xh': 764,
- 'xi': 765,
- 'xj': 766,
- 'xk': 767,
- 'xl': 768,
- 'xm': 769,
- 'xn': 770,
- 'xo': 771,
- 'xp': 772,
- 'xq': 773,
- 'xr': 774,
- 'xs': 775,
- 'xt': 776,
- 'xu': 777,
- 'xv': 778,
- 'xw': 779,
- 'xx': 780,
- 'xy': 781,
- 'xz': 782,
- 'y ': 783,
- "y'": 784,
- 'y.': 785,
- 'ya': 786,
- 'yb': 787,
- 'yc': 788,
- 'yd': 789,
- 'ye': 790,
- 'yf': 791,
- 'yg': 792,
- 'yh': 793,
- 'yi': 794,
- 'yj': 795,
- 'yk': 796,
- 'yl': 797,
- 'ym': 798,
- 'yn': 799,
- 'yo': 800,
- 'yp': 801,
- 'yq': 802,
- 'yr': 803,
- 'ys': 804,
- 'yt': 805,
- 'yu': 806,
- 'yv': 807,
- 'yw': 808,
- 'yx': 809,
- 'yy': 810,
- 'yz': 811,
- 'z ': 812,
- "z'": 813,
- 'z.': 814,
- 'za': 815,
- 'zb': 816,
- 'zc': 817,
- 'zd': 818,
- 'ze': 819,
- 'zf': 820,
- 'zg': 821,
- 'zh': 822,
- 'zi': 823,
- 'zj': 824,
- 'zk': 825,
- 'zl': 826,
- 'zm': 827,
- 'zn': 828,
- 'zo': 829,
- 'zp': 830,
- 'zq': 831,
- 'zr': 832,
- 'zs': 833,
- 'zt': 834,
- 'zu': 835,
- 'zv': 836,
- 'zw': 837,
- 'zx': 838,
- 'zy': 839,
- 'zz': 840}</code></pre>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a><span class="bu">list</span>(stoi_duos.items())[:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="41">
+<pre><code>[('  ', 0),
+ (" '", 1),
+ (' .', 2),
+ (' a', 3),
+ (' b', 4),
+ (' c', 5),
+ (' d', 6),
+ (' e', 7),
+ (' f', 8),
+ (' g', 9)]</code></pre>
 </div>
 </div>
 
