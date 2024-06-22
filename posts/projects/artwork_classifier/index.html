@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -24,7 +24,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -59,7 +59,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -83,7 +83,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -92,13 +98,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
@@ -108,10 +115,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../../index.html">
     <span class="navbar-title">Cracking Data with Yang</span>
     </a>
@@ -123,19 +130,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../../about.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="../../../about.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/yangrchen" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/yangrchen"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
-            <div class="quarto-navbar-tools">
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -203,10 +210,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#prediction-inference" id="toc-prediction-inference" class="nav-link" data-scroll-target="#prediction-inference"><span class="header-section-number">6</span> Prediction / Inference</a></li>
   <li><a href="#further-steps-moving-forward" id="toc-further-steps-moving-forward" class="nav-link" data-scroll-target="#further-steps-moving-forward"><span class="header-section-number">7</span> Further Steps / Moving Forward</a></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/yangrchen/cracking-data-yang/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/yangrchen/cracking-data-yang/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
+
 
 
 
@@ -245,8 +253,8 @@ Reproducibility
 </section>
 <section id="imports" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Imports</h1>
-<div class="cell" data-execution_count="2">
-<details open="">
+<div id="cell-6" class="cell" data-execution_count="2">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fastai.vision.<span class="bu">all</span> <span class="im">import</span> <span class="op">*</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kaggle <span class="im">import</span> api</span>
@@ -261,14 +269,14 @@ Reproducibility
 <p>We’ll first use the Kaggle API to download the dataset into our working directory.</p>
 <p>The dataset provided to us has already separated the data into training and validation sets in the directories <code>dataset/dataset_updated/training_set</code> and <code>dataset/dataset_updated/validation_set</code>, respectively.</p>
 <p>To make the path structure a little simpler, we can move these directories to a directory called <code>data/</code>.</p>
-<div class="cell" data-execution_count="5">
-<details open="">
+<div id="cell-9" class="cell" data-execution_count="5">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> Path(<span class="st">'data'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="9">
-<details open="">
+<div id="cell-10" class="cell" data-execution_count="9">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>download_path <span class="op">=</span> Path(<span class="st">'.'</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> data_path.exists():</span>
@@ -289,8 +297,8 @@ Reproducibility
 </div>
 </div>
 <p>Just to make sure all of our data is valid, let’s check for any images we cannot open using the fastai <code>verify_images</code> function. If there are any failed images, we can remove them using <code>Path.unlink</code>.</p>
-<div class="cell" data-execution_count="10">
-<details open="">
+<div id="cell-12" class="cell" data-execution_count="10">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Retrieve image files on data path</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>im <span class="op">=</span> get_image_files(data_path)</span>
@@ -307,8 +315,8 @@ Reproducibility
 <pre><code>(#108) [Path('data/validation_set/painting/1150.jpg'),Path('data/validation_set/painting/1600.jpg'),Path('data/validation_set/painting/1550.jpg'),Path('data/validation_set/painting/2200.jpg'),Path('data/validation_set/painting/1250.jpg'),Path('data/validation_set/painting/2225.jpg'),Path('data/validation_set/painting/0300.jpg'),Path('data/validation_set/painting/2275.jpg'),Path('data/validation_set/sculpture/170.jpg'),Path('data/validation_set/sculpture/106.jpg')...]</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="11">
-<details open="">
+<div id="cell-13" class="cell" data-execution_count="11">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>failed.<span class="bu">map</span>(Path.unlink)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -341,8 +349,8 @@ Reproducibility
 <p>For our task, we’ll spin up a function <code>get_dls</code> to quickly spin up dataloaders with different batch and image sizes.</p>
 <section id="dataloader-function" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="dataloader-function"><span class="header-section-number">4.1</span> Dataloader Function</h2>
-<div class="cell" data-execution_count="6">
-<details open="">
+<div id="cell-17" class="cell" data-execution_count="6">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_dls(bs: <span class="bu">int</span>, size: <span class="bu">int</span>, valid_pct<span class="op">=</span><span class="fl">0.2</span>, seed<span class="op">=</span><span class="dv">1234</span>) <span class="op">-&gt;</span> DataLoaders:</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
@@ -367,8 +375,8 @@ Reproducibility
 </details>
 </div>
 <p>When we create our dataloader, we can verify that our splitter is working as we expect it to.</p>
-<div class="cell" data-execution_count="7">
-<details open="">
+<div id="cell-19" class="cell" data-execution_count="7">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>torch.backends.cudnn.deterministic <span class="op">=</span> <span class="va">True</span></span>
@@ -383,14 +391,18 @@ Reproducibility
 </div>
 </div>
 <p>Now, let’s check out what images we have to work with using the <code>show_batch</code> function!</p>
-<div class="cell" data-execution_count="8">
-<details open="">
+<div id="cell-21" class="cell" data-execution_count="8">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show an example batch of images</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>dls.show_batch()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-10-output-1.png" class="img-fluid"></p>
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-10-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -402,8 +414,8 @@ Reproducibility
 <p>Transfer learning is a method of using pretrained models that were trained on one task as a starting point for training models on a new task.</p>
 <p>For computer vision tasks, fastai makes initializing a pretrained model simple through <code>vision_learner</code>–by default, the <code>pretrained</code> parameter is <code>True</code>. When we use a pretrained model, the last layer is replaced with a new linear layer with the same number of outputs as our new transfer learning problem (in this case 5 classes). However, this new layer is randomly initialized so we will need to make sure to tune our model to correctly predict the different artwork types.</p>
 <p>To start, we will use the <strong>resnet50</strong> architecture and track the <code>accuracy</code> metric (percent of images predicted correctly).</p>
-<div class="cell" data-execution_count="9">
-<details open="">
+<div id="cell-24" class="cell" data-execution_count="9">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> vision_learner(dls, resnet50, metrics<span class="op">=</span>accuracy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -426,8 +438,8 @@ Reproducibility
 <p>Fastai takes a slightly different approach: The model is test-trained with learning rates that grow exponentially from a low learning rate to a higher learning rate across a number of mini-batches. The process continues until we find a learning rate where the loss begins to diverge and increases significantly.</p>
 <p>What this boils down to is that in the fastai version we don’t necessarily need to run for multiple epochs to get an optimal learning rate as we are training for a set number of mini-batches.</p>
 <p>Conveniently, <code>lr_find</code> gives us the loss vs.&nbsp;learning rate plot and also enables us to directly extract learning rates that could be optimal based off different <em>suggestion</em> functions. For example, we can use <code>steep</code> which gets the learning rate with the steepest slope.</p>
-<div class="cell" data-execution_count="10">
-<details open="">
+<div id="cell-26" class="cell" data-execution_count="10">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn.lr_find(suggest_funcs<span class="op">=</span>steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -437,7 +449,11 @@ Reproducibility
 <p>Log plot of loss vs.&nbsp;learning rate</p>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-12-output-2.png" class="img-fluid"></p>
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-12-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -447,8 +463,8 @@ Reproducibility
 <p>At a high level, we are starting at some initial learning rate, linearly increasing our learning rate after every batch up to a maximum learning rate, and from the maximum learning rate down to some minimum learning rate several magnitudes lower than our initial learning rate.</p>
 <p>The idea behind this all is to warm up our training with a low learning rate and use the high learning rate to help find minimums in our loss function that are flatter, allowing the model to generalize better.</p>
 <p>During the last segment of training, the descending learning rates help the optimizer avoid skipping over a steeper loss within the flatter areas. This process allows our model to converge faster and consequently achieve better results with lower iterations than traditional training methods. Smith calls this occurrence <strong>super-convergence.</strong></p>
-<div class="cell" data-execution_count="11">
-<details>
+<div id="cell-28" class="cell" data-execution_count="11">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_example_cycle(x_min, x_max, y_min, y_max, padding):</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    values <span class="op">=</span> <span class="dv">100</span></span>
@@ -466,16 +482,20 @@ Reproducibility
 <span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="12">
-<details open="">
+<div id="cell-fig-1cycle-example" class="cell" data-execution_count="12">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plot_example_cycle(<span class="dv">0</span>, <span class="dv">40</span>, <span class="fl">0.001</span>, <span class="fl">0.01</span>, <span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<div id="fig-1cycle-example" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-1cycle-example-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;1: Example representation of a linear 1cycle learning rate schedule.</figcaption>
+<div id="fig-1cycle-example" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-1cycle-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-1cycle-example-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-1cycle-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Example representation of a linear 1cycle learning rate schedule.
+</figcaption>
 </figure>
 </div>
 </div>
@@ -484,14 +504,14 @@ Reproducibility
 <p>With transfer learning, our model has additional new layers that we can train for the problem we are trying to solve. At the start of training, we may not want to completely readjust the weights in the model’s previously learned layers because they account for high-level details of the image like line and shape.</p>
 <p>In a pretrained model, the previous trained layers start out <strong>frozen</strong>, meaning their weights aren’t updated during training unless we unfreeze them. Later, we will unfreeze all the layers and use a range of learning rates to help adjust them slightly for our artwork classification.</p>
 <p>Fastai recommends training the frozen pretrained model for a few epochs before training the full pretrained model. We’ll start with 3 epochs frozen using the learning rate we found before and then train the full model for 10 epochs. We can get an idea of how our error rates changes across training from here. Our losses along with our metrics will be useful in determining if we’ve fitted a decent model or whether we are underfitting or overfitting.</p>
-<div class="cell" data-execution_count="13">
-<details open="">
+<div id="cell-31" class="cell" data-execution_count="13">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">epoch</th>
@@ -528,8 +548,8 @@ Reproducibility
 </div>
 </div>
 <p>Now we can unfreeze the layers and find a new learning rate to train on:</p>
-<div class="cell" data-execution_count="14">
-<details open="">
+<div id="cell-33" class="cell" data-execution_count="14">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>learn.unfreeze()</span>
@@ -542,17 +562,21 @@ Reproducibility
 <pre><code>SuggestedLRs(valley=0.00013182566908653826)</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-16-output-3.png" class="img-fluid"></p>
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-16-output-3.png" class="img-fluid figure-img"></p>
+</figure>
 </div>
 </div>
-<div class="cell" data-execution_count="15">
-<details open="">
+</div>
+<div id="cell-34" class="cell" data-execution_count="15">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">10</span>, <span class="fl">1e-5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">epoch</th>
@@ -640,9 +664,9 @@ Reproducibility
 </section>
 <section id="interpreting-the-loss-curves-further-training" class="level2" data-number="5.3">
 <h2 data-number="5.3" class="anchored" data-anchor-id="interpreting-the-loss-curves-further-training"><span class="header-section-number">5.3</span> Interpreting the Loss Curves, Further Training?</h2>
-<p>After training our model, we will see how our training and validation losses have changed over the course of our iteration / epochs using <strong>loss curves</strong>. Loss curves won’t provide the entire story of our model but we’ll have a broad picture of how our model performs over the selected dataset and batch size. <a href="#fig-loss-iterations">Figure&nbsp;2</a> shows the loss curves across the training iterations.</p>
-<div class="cell" data-execution_count="16">
-<details open="">
+<p>After training our model, we will see how our training and validation losses have changed over the course of our iteration / epochs using <strong>loss curves</strong>. Loss curves won’t provide the entire story of our model but we’ll have a broad picture of how our model performs over the selected dataset and batch size. <a href="#fig-loss-iterations" class="quarto-xref">Figure&nbsp;2</a> shows the loss curves across the training iterations.</p>
+<div id="cell-fig-loss-iterations" class="cell" data-execution_count="16">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>learn.recorder.plot_loss()</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Iterations"</span>)</span>
@@ -651,19 +675,23 @@ Reproducibility
 <span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<div id="fig-loss-iterations" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-loss-iterations-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;2: Loss curves across the model’s training iterations</figcaption>
+<div id="fig-loss-iterations" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loss-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-loss-iterations-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-loss-iterations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Loss curves across the model’s training iterations
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
 <p>Initially, our validation loss starts out lower than our training loss but our training loss quickly converges as our training progresses.</p>
 <p>We should note that we reach a point where our validation loss is higher than our training loss and stagnates a bit. The model is becoming overconfident in its predictions and we have to ask ourselves: are we <strong>overfitting</strong>?</p>
-<p><a href="#fig-loss-epochs">Figure&nbsp;3</a> shows the loss curves across the training epochs in case we need to go back and retrain our model to a previous epoch.</p>
-<div class="cell" data-execution_count="17">
-<details open="">
+<p><a href="#fig-loss-epochs" class="quarto-xref">Figure&nbsp;3</a> shows the loss curves across the training epochs in case we need to go back and retrain our model to a previous epoch.</p>
+<div id="cell-fig-loss-epochs" class="cell" data-execution_count="17">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">0</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>valid_loss <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">1</span>)</span>
@@ -676,10 +704,14 @@ Reproducibility
 <span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<div id="fig-loss-epochs" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-loss-epochs-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;3: Loss curves across training epochs</figcaption>
+<div id="fig-loss-epochs" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loss-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-loss-epochs-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-loss-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Loss curves across training epochs
+</figcaption>
 </figure>
 </div>
 </div>
@@ -691,9 +723,9 @@ Reproducibility
 <p>When we look at our losses visually, we can see that there is an emerging gap between our training and validation loss and the latter seems to stagnate. How big of a gap is too big? It’s hard to say because it depends on a variety of factors like the scale of the dataset. Rather, we should look for general stability in our validation loss throughout training. If our validation loss begins to increase significantly, then we might begin to worry that we are overfitting to our training data too much.</p>
 <p>We could stop early, but with one-cycle training that may not be a good idea because we may not allow our learning rate to reach the small values that would benefit our training.</p>
 <p>One key takeaway from fastai is that we should be checking to see if our performance metrics are getting significantly worse to decide if the model is overfitting. It’s not enough to view the losses alone.</p>
-<p><a href="#fig-accuracy-epochs">Figure&nbsp;4</a> shows the accuracy across the training epochs.</p>
-<div class="cell" data-execution_count="18">
-<details open="">
+<p><a href="#fig-accuracy-epochs" class="quarto-xref">Figure&nbsp;4</a> shows the accuracy across the training epochs.</p>
+<div id="cell-fig-accuracy-epochs" class="cell" data-execution_count="18">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>accuracy_metric <span class="op">=</span> L(learn.recorder.values).itemgot(<span class="dv">2</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>highest_accuracy_epoch <span class="op">=</span> np.argmax(accuracy_metric)</span>
@@ -712,10 +744,14 @@ Reproducibility
 <pre><code>Highest accuracy during last run: 9</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<div id="fig-accuracy-epochs" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-accuracy-epochs-output-2.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;4: Accuracy across the training epochs</figcaption>
+<div id="fig-accuracy-epochs" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-accuracy-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-accuracy-epochs-output-2.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-accuracy-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Accuracy across the training epochs
+</figcaption>
 </figure>
 </div>
 </div>
@@ -728,8 +764,8 @@ Reproducibility
 <p>“Remember, it’s not just that we’re looking for the validation loss to get worse, but the actual metrics. Your validation loss will first get worse during training because the model gets overconfident, and only later will get worse because it is incorrectly memorizing the data. We only care in practice about the latter issue. Remember, our loss function is just something that we use to allow our optimizer to have something it can differentiate and optimize; it’s not actually the thing we care about in practice.”</p>
 </blockquote>
 <p>To really evaluate our model’s performance, we would run our model on a representative test data set that it has never seen before. This will allow us to get a more honest assessment of how our model is doing and we don’t want to report accuracy on our training model alone. Once we’ve decided on a model, we’ll look at how we can use the images we didn’t use for training as a test set.</p>
-<div class="cell" data-execution_count="19">
-<details open="">
+<div id="cell-42" class="cell" data-execution_count="19">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -737,8 +773,8 @@ Reproducibility
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>learn2 <span class="op">=</span> vision_learner(dls, resnet50, metrics<span class="op">=</span>accuracy, wd<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="20">
-<details open="">
+<div id="cell-43" class="cell" data-execution_count="20">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>lr_steep <span class="op">=</span> learn2.lr_find(suggest_funcs<span class="op">=</span>steep, show_plot<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -747,14 +783,14 @@ Reproducibility
 
 </div>
 </div>
-<div class="cell" data-execution_count="21">
-<details open="">
+<div id="cell-44" class="cell" data-execution_count="21">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>learn2.fit_one_cycle(<span class="dv">3</span>, lr_steep.steep)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">epoch</th>
@@ -790,8 +826,8 @@ Reproducibility
 </table>
 </div>
 </div>
-<div class="cell" data-execution_count="22">
-<details open="">
+<div id="cell-45" class="cell" data-execution_count="22">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>learn2.unfreeze()</span>
@@ -804,17 +840,21 @@ Reproducibility
 <pre><code>SuggestedLRs(valley=6.30957365501672e-05)</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-24-output-3.png" class="img-fluid"></p>
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-24-output-3.png" class="img-fluid figure-img"></p>
+</figure>
 </div>
 </div>
-<div class="cell" data-execution_count="23">
-<details open="">
+</div>
+<div id="cell-46" class="cell" data-execution_count="23">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>set_seed(SEED, reproducible<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>learn2.fit_one_cycle(<span class="dv">10</span>, lr_max<span class="op">=</span><span class="bu">slice</span>(<span class="fl">1e-6</span>, <span class="fl">1e-4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th">epoch</th>
@@ -900,8 +940,8 @@ Reproducibility
 </div>
 </div>
 <p>Our accuracy is about the same, but both validation losses seemed to stabilize. The validation loss and accuracy are better in our first model, so we will move forward with it for now.</p>
-<div class="cell" data-execution_count="24">
-<details open="">
+<div id="cell-fig-loss-iterations-wd" class="cell" data-execution_count="24">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>learn2.recorder.plot_loss()</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Iterations"</span>)</span>
@@ -910,16 +950,20 @@ Reproducibility
 <span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<div id="fig-loss-iterations-wd" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-loss-iterations-wd-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;5: Loss curves across the model’s training iterations</figcaption>
+<div id="fig-loss-iterations-wd" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loss-iterations-wd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-loss-iterations-wd-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-loss-iterations-wd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Loss curves across the model’s training iterations
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="25">
-<details open="">
+<div id="cell-fig-loss-epochs-wd" class="cell" data-execution_count="25">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> L(learn2.recorder.values).itemgot(<span class="dv">0</span>)</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>valid_loss <span class="op">=</span> L(learn2.recorder.values).itemgot(<span class="dv">1</span>)</span>
@@ -932,16 +976,20 @@ Reproducibility
 <span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<div id="fig-loss-epochs-wd" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-loss-epochs-wd-output-1.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;6: Loss curves across training epochs</figcaption>
+<div id="fig-loss-epochs-wd" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loss-epochs-wd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-loss-epochs-wd-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-loss-epochs-wd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Loss curves across training epochs
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<div class="cell" data-execution_count="26">
-<details open="">
+<div id="cell-fig-accuracy-epochs-wd" class="cell" data-execution_count="26">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>accuracy_metric <span class="op">=</span> L(learn2.recorder.values).itemgot(<span class="dv">2</span>)</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>highest_accuracy_epoch <span class="op">=</span> np.argmax(accuracy_metric)</span>
@@ -960,43 +1008,61 @@ Reproducibility
 <pre><code>Highest accuracy during last run: 8</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<div id="fig-accuracy-epochs-wd" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-accuracy-epochs-wd-output-2.png" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption">Figure&nbsp;7: Accuracy across the training epochs</figcaption>
+<div id="fig-accuracy-epochs-wd" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-accuracy-epochs-wd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-accuracy-epochs-wd-output-2.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-accuracy-epochs-wd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Accuracy across the training epochs
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>We can use a confusion matrix to see the number of correctly classified and misclassified images on our training set. <a href="#fig-confusion-matrix">Figure&nbsp;8</a> displays the confusion matrix for the first model we fine-tuned.</p>
-<div id="fig-confusion-matrix" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<details open="">
+<p>We can use a confusion matrix to see the number of correctly classified and misclassified images on our training set. <a href="#fig-confusion-matrix" class="quarto-xref">Figure&nbsp;8</a> displays the confusion matrix for the first model we fine-tuned.</p>
+<div class="cell" data-execution_count="27">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>interp <span class="op">=</span> ClassificationInterpretation.from_learner(learn)</span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>interp.plot_confusion_matrix()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="fig-confusion-matrix-1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div id="fig-confusion-matrix" class="cell quarto-figure quarto-figure-center quarto-float anchored" data-execution_count="27">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-confusion-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="fig-confusion-matrix-1" class="cell-output cell-output-display quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-confusion-matrix-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 
-<figcaption class="figure-caption">(a) Confusion matrix on the training set</figcaption>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-confusion-matrix-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Confusion matrix on the training set
+</figcaption>
 </figure>
 </div>
 <div class="cell-output cell-output-display">
-<div id="fig-confusion-matrix-2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-confusion-matrix-output-2.png" class="img-fluid figure-img" data-ref-parent="fig-confusion-matrix"></p>
-<figcaption class="figure-caption">(b)</figcaption>
+<div id="fig-confusion-matrix-2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-confusion-matrix-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-confusion-matrix-output-2.png" id="fig-confusion-matrix-2" class="img-fluid figure-img" data-ref-parent="fig-confusion-matrix">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-confusion-matrix-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b)
+</figcaption>
 </figure>
 </div>
 </div>
-<figcaption class="figure-caption">Figure&nbsp;8: <strong>?(caption)</strong></figcaption>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-confusion-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8
+</figcaption>
 </figure>
+</div>
 </div>
 <p>We can also display a report with common classification metrics like precision, recall, and the F1-score. For this project, we are mainly focused on the F1-score.</p>
 <p>The weighted F1-score is the the mean of all the class F1 scores while taking into account the number of occurrences in each class. In general, we are aiming for a balance between precision and recall on a scale between 0 and 1. Our model achieved a weighted F1-score of <strong>0.930</strong> on the training set.</p>
-<div class="cell" data-execution_count="28">
-<details open="">
+<div id="cell-54" class="cell" data-execution_count="28">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>interp.print_classification_report()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1018,30 +1084,44 @@ weighted avg       0.93      0.93      0.93      1544
 </code></pre>
 </div>
 </div>
-<p><a href="#fig-top-losses">Figure&nbsp;9</a> shows the top 10 losses of training images predicted by our model. We can use this to get a visual idea of what kinds of images our model might be misclassifying.</p>
+<p><a href="#fig-top-losses" class="quarto-xref">Figure&nbsp;9</a> shows the top 10 losses of training images predicted by our model. We can use this to get a visual idea of what kinds of images our model might be misclassifying.</p>
 <p>In particular, from both the classification report and the top losses our model seems to misclassify engravings and drawings more than other types of art. We also see some confusion between iconography and paintings. Maybe not all images are standardized and there are definitely tough cases where the line between painting, drawing, and iconography are blurry.</p>
-<div id="fig-top-losses" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<details open="">
+<div class="cell" data-execution_count="72">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>interp.plot_top_losses(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="fig-top-losses-1" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
+<div id="fig-top-losses" class="cell quarto-figure quarto-figure-center quarto-float anchored" data-execution_count="72">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-top-losses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div id="fig-top-losses-1" class="cell-output cell-output-display quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-top-losses-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 
-<figcaption class="figure-caption">(a) Top 10 losses of images in the training set</figcaption>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-top-losses-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Top 10 losses of images in the training set
+</figcaption>
 </figure>
 </div>
 <div class="cell-output cell-output-display">
-<div id="fig-top-losses-2" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="index_files/figure-html/fig-top-losses-output-2.png" class="img-fluid figure-img" data-ref-parent="fig-top-losses"></p>
-<figcaption class="figure-caption">(b)</figcaption>
+<div id="fig-top-losses-2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-top-losses-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-top-losses-output-2.png" id="fig-top-losses-2" class="img-fluid figure-img" data-ref-parent="fig-top-losses">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-top-losses-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b)
+</figcaption>
 </figure>
 </div>
 </div>
-<figcaption class="figure-caption">Figure&nbsp;9: <strong>?(caption)</strong></figcaption>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-top-losses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9
+</figcaption>
 </figure>
+</div>
 </div>
 <p>It’s fascinating that we are able to classify images at all with these results with a bit of conceptual understanding and a few lines of code! However, we still need to evaluate on the test set for reporting purposes.</p>
 </section>
@@ -1049,16 +1129,16 @@ weighted avg       0.93      0.93      0.93      1544
 <section id="prediction-inference" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Prediction / Inference</h1>
 <p>The last thing I want to cover is how we can use our newly trained model to make predictions on new artwork images. We first export our model:</p>
-<div class="cell" data-execution_count="73">
-<details open="">
+<div id="cell-60" class="cell" data-execution_count="73">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Save model into models/</span></span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>model_path <span class="op">=</span> Path(<span class="st">'models'</span>)</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>learn.export(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="74">
-<details open="">
+<div id="cell-61" class="cell" data-execution_count="74">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load model and display the unique classes that can be predicted by the model</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>artwork_model <span class="op">=</span> load_learner(model_path <span class="op">/</span> <span class="st">'artwork.pkl'</span>)</span>
@@ -1069,15 +1149,15 @@ weighted avg       0.93      0.93      0.93      1544
 </div>
 </div>
 <p>After retrieving our model, we need to supply our test images as a dataloader. Call the <code>test_dl</code> method on our dataloaders object will allow us to apply all the transformations we used in training and instantly format the test images to be input to the model</p>
-<div class="cell" data-execution_count="75">
-<details open="">
+<div id="cell-63" class="cell" data-execution_count="75">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>test_set_images <span class="op">=</span> get_image_files(data_path <span class="op">/</span> <span class="st">'validation_set'</span>)</span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>test_dl <span class="op">=</span> dls.test_dl(test_set_images, with_labels<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell" data-execution_count="76">
-<details open="">
+<div id="cell-64" class="cell" data-execution_count="76">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>preds, targs <span class="op">=</span> artwork_model.get_preds(dl<span class="op">=</span>test_dl)</span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>preds, targs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1131,8 +1211,8 @@ weighted avg       0.93      0.93      0.93      1544
          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]))</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="77">
-<details open="">
+<div id="cell-65" class="cell" data-execution_count="77">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a list of individual probabilities for each class</span></span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="co"># list(zip(artwork_model.dls.vocab, artwork_model.predict(img_inf)[2] * 100))</span></span>
@@ -1143,8 +1223,8 @@ weighted avg       0.93      0.93      0.93      1544
 <pre><code>tensor(0.9194)</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="78">
-<details open="">
+<div id="cell-66" class="cell" data-execution_count="78">
+<details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(targs, pred_labels, target_names<span class="op">=</span>artwork_model.dls.vocab, digits<span class="op">=</span><span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1224,6 +1304,33 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
   }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
   const toggleColorMode = (alternate) => {
     // Switch the stylesheets
     const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
@@ -1290,13 +1397,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return localAlternateSentinel;
     }
   }
-  let localAlternateSentinel = 'default';
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
   // Dark / light mode switch
   window.quartoToggleColorScheme = () => {
     // Read the current dark / light value 
     let toAlternate = !hasAlternateSentinel();
     toggleColorMode(toAlternate);
     setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
   };
   // Ensure there is a toggle, if there isn't float one in the top right
   if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
@@ -1375,10 +1484,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/yangrchen\.github\.io\/cracking-data-yang\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1388,8 +1514,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1401,7 +1536,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1445,6 +1703,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1470,6 +1729,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1533,4 +1818,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/yangrchen/cracking-data-yang/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
