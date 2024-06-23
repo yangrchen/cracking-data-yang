@@ -381,7 +381,7 @@ Figure&nbsp;1: A sample bar chart of the most frequent names
 <h1>Bigram Language Model</h1>
 <p>The first model we can use as a potential baseline is a bigram model. With a bigram model, we will predict a new character based off the previous one. We will also introduce a <code>.</code> token to denote the start and end of a string. When generating a new word from scratch, a starting <code>.</code> will be used. For an example, where <code>-&gt;</code> will represent “leads to”:</p>
 <ul>
-<li>In the string <code>abcd</code>, <code>. -&gt; a</code>, <code>.a -&gt; b</code>, <code>ab -&gt; c</code>, <code>bc -&gt; d</code>, <code>cd -&gt; .</code></li>
+<li>In the string <code>abcd</code>, <code>. -&gt; a</code>, <code>a -&gt; b</code>, <code>b -&gt; c</code>, <code>c -&gt; d</code>, <code>d -&gt; .</code></li>
 </ul>
 <p>The main difference in our dataset from the makemore one is the addition of a blank space (” “) token and an apostrophe (” ’ “).</p>
 <div id="cell-10" class="cell" data-execution_count="5">
